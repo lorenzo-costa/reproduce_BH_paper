@@ -203,6 +203,8 @@ def generate_means(m, m0, scheme, L, rng=None, rounding_biase_correction=False):
     for pos, count in zip(levels, counts):
         means[idx : idx + count] = pos
         idx += count
+    
+    rng.shuffle(means)
 
     return means
 

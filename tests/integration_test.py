@@ -82,12 +82,12 @@ def test_run_simulation_reproducibility():
         assert np.array_equal(normal_samples1[i], normal_samples2[i])
 
 
-# test that power of FDR is always greater than or equal to power of Bonferroni
+# test that for large scale testing power of fdr > power bonferroni
 def test_fdr_power_greater_equal_bonferroni():
     nsim = 20
     methods = [Bonferroni(), BenjaminiHochberg()]
     alpha = 0.05
-    m = [16]
+    m = [1000]
     m0 = [1 / 2]
     metrics = [Power()]
     L = [5]
