@@ -4,7 +4,6 @@ from src.helper_functions.analyse_functions import analyse_function
 
 
 if __name__ == "__main__":
-    # load config
     with open("config.yaml", "r") as f:
         cfg = yaml.safe_load(f)
 
