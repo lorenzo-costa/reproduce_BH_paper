@@ -19,6 +19,7 @@ import pickle
 import numpy as np
 import yaml
 import time
+import argparse
 
 method_map = {
     "Bonferroni": Bonferroni,
@@ -30,8 +31,14 @@ if __name__ == "__main__":
     # load config
     with open("config.yaml", "r") as f:
         cfg = yaml.safe_load(f)
+        
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--nsim", type=int, default=None)
+    parser.add_argument("--parallel")
+    args = parser.parse_args()
+    nsim = args.nsim if args.nsim is not None else cfg["nsim"]
+    parallel = bool(int(args.parallel))
 
-    nsim = cfg["nsim"]
     methods = [method_map[name]() for name in cfg["methods"]]
     alpha = cfg["alpha"]
     m = cfg["m"]
@@ -56,7 +63,7 @@ if __name__ == "__main__":
         rng=rng,
         metrics=metrics,
         results_dir=data_dir + "/simulated/",
-        parallel=True,
+        parallel=parallel,
     )
 
     sim_out.to_csv(f"{data_dir}/simulated/full_simulation_results.csv", index=False)

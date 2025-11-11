@@ -3,13 +3,14 @@
 ### Run-time profiling
 The previous version took ~40 minutes on 20k simulations using parallelisation with 10 parallel processes. To get a better estimate I also run this without parallelisation but using 2k simulations which takes ~10 minutes (I know it's embarassingly slow).
 
-The profiler shows that the bottleneck is the repeated concatenation of pd.DataFrames within the loop. This is the most obvious speed up which drives down the computational complexity by almost 50x.
+The profiler shows that the bottleneck is the repeated concatenation of pd. In my simulation loop I am extending the results dataset at each iteration using pd.concat. This clearly is super inefficient. Interstingly, the speed up I saw at the beginning using parallelisation came mostly from batching these concats rather than actual parallel computation. 
+This is the most obvious speed up which drives down the computational complexity by almost 50x.
 
 According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient
 
-On 2k simulation runs:
-- Old version with parallelization takes ~43s on 2k
-- Removing pd concatenation takes ~70s and ~35s with paralelisation
+On 1k simulation runs:
+- Old version with parallelization takes $18.9s \pm 0.28$
+- Removing pd concatenation takes $34.7 \pm 0.15$ and $17.9s\pm 0.12$ 
 - 
 
 ### Computational complexity analysis
