@@ -2,6 +2,7 @@
 
 import numpy as np
 from abc import ABC, abstractmethod
+from src.helper_functions.numba_functions import compute_power, compute_fdr, compute_true_rejections, compute_total_rejections
 
 
 class Metric(ABC):
@@ -88,10 +89,8 @@ class Power(Metric):
         float
             Statistical power
         """
-        truth_mask = true_values != 0
-        power = np.mean(rejected[truth_mask]) if np.sum(truth_mask) > 0 else 0.0
 
-        return power
+        return compute_power(rejected, true_values)
 
 
 class FalseDiscoveryRate(Metric):
@@ -138,13 +137,8 @@ class FalseDiscoveryRate(Metric):
         float
             False Discovery Rate
         """
-        if np.sum(rejected) == 0:
-            return 0.0
 
-        false_rejections = np.sum(rejected & (true_values == 0))
-        fdr = false_rejections / np.sum(rejected)
-
-        return fdr
+        return compute_fdr(rejected, true_values)
 
 
 class TrueRejections(Metric):
@@ -191,10 +185,8 @@ class TrueRejections(Metric):
         int
             Number of true rejections
         """
-        truth_mask = true_values != 0
-        true_rejections = np.sum(rejected[truth_mask])
 
-        return true_rejections
+        return compute_true_rejections(rejected, true_values)
 
 
 class RejectionsNumber(Metric):
@@ -241,6 +233,5 @@ class RejectionsNumber(Metric):
         int
             Total number of rejections
         """
-        total_rejections = np.sum(rejected)
 
-        return total_rejections
+        return compute_total_rejections(rejected)

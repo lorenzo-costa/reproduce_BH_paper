@@ -34,7 +34,7 @@ if __name__ == "__main__":
         
     parser = argparse.ArgumentParser()
     parser.add_argument("--nsim", type=int, default=None)
-    parser.add_argument("--parallel")
+    parser.add_argument("--parallel", default=1)
     args = parser.parse_args()
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
     parallel = bool(int(args.parallel))

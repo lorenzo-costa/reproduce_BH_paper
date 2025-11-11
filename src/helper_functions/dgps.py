@@ -4,6 +4,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from scipy import stats
 from scipy import special
+from numba import njit, int64, float64
 
 
 
@@ -106,8 +107,8 @@ class NormalGenerator(DataGenerator):
     def null_value(self):
         return self.loc
 
-
-def generate_means(m, m0, scheme, L, rng=None, rounding_biase_correction=False):
+@njit(float64[:](int64, int64, int64, int64))
+def generate_means(m, m0, scheme, L):
     """Generate a simulation scenario from a Gaussian sample.
 
     Parameters
@@ -137,82 +138,41 @@ def generate_means(m, m0, scheme, L, rng=None, rounding_biase_correction=False):
     array([0., 0., 0., 0.])
     """
 
-    if not isinstance(m, int) or m <= 0:
-        raise ValueError("m must be a positive integer")
-    if not isinstance(L, int) or L <= 0:
-        raise ValueError("L must be a positive integer")
-    if not isinstance(m0, int) or m0 < 0 or m0 > m:
-        raise ValueError("m0 must be an integer between 0 and m inclusive")
-    if rng is None:
-        rng = np.random.default_rng()
-
-    if scheme not in ["E", "D", "I"]:
-        raise ValueError("scheme must be one of 'E', 'D', or 'I'")
-
-    means = np.zeros(m)
+    m1 = m - m0
+    means = np.zeros(m1)
     if m0 == m:
         return means
 
-    m1 = m - m0
     levels = np.array([L / 4, L / 2, 3 * L / 4, L])
 
-    if scheme == "D":  # Linearly Decreasing
+    if scheme == 1:  # Linearly Decreasing
         # more hp closer to 0. divide non nulls as: 4k, 3k, 2k, k
         # sum = 10k = non nulls, so k = non-nulls/10
         base = m1 / 10
         counts = np.array([4 * base, 3 * base, 2 * base, base])
-    elif scheme == "E":  # Equal
+    elif scheme == 2:  # Equal
         counts = np.full(4, m1 / 4)
     else:
         base = m1 / 10
         counts = np.array([base, 2 * base, 3 * base, 4 * base])
 
-    counts = counts.astype(int)
+    for i in range(len(counts)):
+        counts[i] = int(counts[i])
 
     # Adjust for rounding errors
-    if rounding_biase_correction is False:
-        diff = m1 - counts.sum()
-        if diff > 0:
-            for i in range(diff):
-                counts[-1 - i] += 1
-        elif diff < 0:
-            for i in range(-diff):
-                counts[i] -= 1
-    else:
-        # this is what i belive the code should be but it does not reproduce paper
-        # implementation. i think the difference is in how they handle the case of m
-        # small. e.g. for m=4 and m0=2 my code would give [1, 2, 0, 0] but the code
-        # that correctly repoduces the paper results gives [3, 4, 0, 0]
-        # the difference is that with my code I get very low power for m=4, with theirs
-        # I get power almost 1
-        diff = m1 - counts.sum()
-        if scheme in ["E", "I"]:
-            if diff > 0:
-                for i in range(diff):
-                    counts[-1 - i] += 1
-            elif diff < 0:
-                for i in range(-diff):
-                    counts[i] -= 1
-        elif scheme in "D":
-            if diff > 0:
-                for i in range(diff):
-                    counts[i] += 1
-            elif diff < 0:
-                for i in range(-diff):
-                    counts[-1 - i] -= 1
-
-    idx = 0
-    for pos, count in zip(levels, counts):
-        means[idx : idx + count] = pos
-        idx += count
-    
-    rng.shuffle(means)
+    diff = m1 - counts.sum()
+    if diff > 0:
+        for i in range(diff):
+            counts[-1 - i] += 1
+    elif diff < 0:
+        for i in range(-diff):
+            counts[i] -= 1
+            
+    means[0:counts[0]] = levels[0]
+    means[counts[0] : counts[0] + counts[1]] = levels[1]
+    means[counts[0] + counts[1] : counts[0] + counts[1] + counts[2]] = levels[2]
+    means[counts[0] + counts[1] + counts[2] : counts[0] + counts[1] + counts[2]+counts[3]] = levels[3]
 
     return means
-
-
-# def compute_p_values(z_scores):
-#     return 2 * (1 - stats.norm.cdf(np.abs(z_scores)))
-
 def compute_p_values(z_scores):
     return special.erfc(np.abs(z_scores) / np.sqrt(2))
