@@ -211,8 +211,8 @@ def generate_means(m, m0, scheme, L, rng=None, rounding_biase_correction=False):
     return means
 
 
-def compute_p_values(z_scores):
-    return 2 * (1 - stats.norm.cdf(np.abs(z_scores)))
-
 # def compute_p_values(z_scores):
-#     return special.erfc(np.abs(z_scores) / np.sqrt(2))
+#     return 2 * (1 - stats.norm.cdf(np.abs(z_scores)))
+
+def compute_p_values(z_scores):
+    return special.erfc(np.abs(z_scores) / np.sqrt(2))

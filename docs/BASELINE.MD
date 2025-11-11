@@ -2,16 +2,17 @@
 
 ### Run-time profiling
 The previous version took ~40 minutes on 20k simulations using parallelisation with 10 parallel processes. To get a better estimate I also run this without parallelisation but using 2k simulations which takes ~10 minutes (I know it's embarassingly slow).
+Note, for project 2 I just naively implemented parallelisation without profiling because the simulation was taking hours to run. This resulted in a faster but still suboptimal code. I will now try to make it better.
 
-The profiler shows that the bottleneck is the repeated concatenation of pd. In my simulation loop I am extending the results dataset at each iteration using pd.concat. This clearly is super inefficient. Interstingly, the speed up I saw at the beginning using parallelisation came mostly from batching these concats rather than actual parallel computation. 
+1) The profiler shows that the bottleneck is the repeated concatenation of pd. In my simulation loop I am extending the results dataset at each iteration using pd.concat. This clearly is super inefficient. Interstingly, the speed up I saw at the beginning using parallelisation came mostly from batching these concats rather than actual parallel computation. 
 This is the most obvious speed up which drives down the computational complexity by almost 50x.
-
-According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient
+2) According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `special.erfc(np.abs(z_scores) / np.sqrt(2))`
+3) Profiler shows that the next bottleneck are the functions computing the metrics (i.e. FDR,)
 
 On 1k simulation runs:
 - Old version with parallelization takes $18.9s \pm 0.28$
 - Removing pd concatenation takes $34.7 \pm 0.15$ and $17.9s\pm 0.12$ 
-- 
+- Changing to erf takes $24.7s \pm 0.18$ and $16.9s \pm 0.63$ with parallelization
 
 ### Computational complexity analysis
 The parameters I am changing throughout the study are:
