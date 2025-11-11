@@ -160,27 +160,26 @@ def run_simulation_parallel(
         for i in range(nsim)
     ]
 
-    out = pd.DataFrame()
+    out = []
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
 
     with Pool(processes=n_jobs) as pool:
-        # imap maintains order and enable progress tracking
         with tqdm(total=total_runs, desc="Running simulations") as pbar:
             for i, (results, samples_dict) in enumerate(
                 pool.imap(run_single_simulation, sim_args)
             ):
-                out = pd.concat([out, pd.DataFrame(results)], ignore_index=True)
+                out.extend(results) 
                 samples_list.append(samples_dict)
 
                 pbar.update(len(results))
 
                 if (i + 1) in save_points:
-                    out.to_csv(
+                    pd.DataFrame(out).to_csv(
                         f"{results_dir}/simulation_results_checkpoint_{i}.csv",
                         index=False,
                     )
-
+    out = pd.DataFrame(out)
     return out, samples_list
 
 
@@ -260,13 +259,13 @@ def run_simulation(
     total_scenarios = len(m) * len(m0_fraction) * len(L) * len(scheme) * len(method)
     total_runs = nsim * total_scenarios
 
-    out = pd.DataFrame()
+    out = []
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
     with tqdm(total=total_runs, desc="Running simulations") as pbar:
         for i in range(nsim):
             if (i + 1) in save_points:
-                out.to_csv(
+                pd.DataFrame(out).to_csv(
                     f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
                     index=False,
                 )
@@ -292,9 +291,7 @@ def run_simulation(
                     # TODO: Optimize this concatenation
                     # this creates a monstrous bottleneck, luckyly the parallel version avoids it
                     # may easily get a 50x speedup by gettign this right.
-                    out = pd.concat(
-                        [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True
-                    )
+                    out.append(scenario_out)
                     pbar.update(1)
-
+    out = pd.DataFrame(out)
     return out, samples_list

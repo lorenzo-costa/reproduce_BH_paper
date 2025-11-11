@@ -7,6 +7,7 @@ from src.helper_functions.methods import (
 )
 from src.helper_functions.metrics import Power, TrueRejections, RejectionsNumber
 import numpy as np
+import pandas as pd
 
 
 def test_run_simulation():
@@ -116,3 +117,59 @@ def test_fdr_power_greater_equal_bonferroni():
         assert power_fdr >= power_bonf, (
             f"FDR power {power_fdr} is less than Bonferroni power {power_bonf}"
         )
+
+# def test_parallelization_equal_nonparallel():
+#     nsim = 10
+#     methods = [Bonferroni(), BonferroniHochberg(), BenjaminiHochberg()]
+#     alpha = 0.05
+#     m = [4, 8, 16]
+#     m0 = [3 / 4, 1 / 2]
+#     metrics = [Power(), TrueRejections(), RejectionsNumber()]
+#     L = [5]
+#     scheme = ["E"]
+#     rng = np.random.default_rng(42)
+
+#     result_sim_parallel, _ = run_simulation(
+#         m=m,
+#         m0_fraction=m0,
+#         L=L,
+#         scheme=scheme,
+#         method=methods,
+#         alpha=alpha,
+#         nsim=nsim,
+#         rng=rng,
+#         metrics=metrics,
+#         parallel=True,
+#     )
+
+#     rng = np.random.default_rng(42)
+#     result_sim_nonparallel, _ = run_simulation(
+#         m=m,
+#         m0_fraction=m0,
+#         L=L,
+#         scheme=scheme,
+#         method=methods,
+#         alpha=alpha,
+#         nsim=nsim,
+#         rng=rng,
+#         metrics=metrics,
+#         parallel=False,
+#     )
+    
+#     res_np_summary = result_sim_nonparallel.groupby(['m', 'm0_fraction', 'L', 'scheme', 'method']).apply(
+#         lambda x: pd.Series({
+#             'Power': x['Power'].mean(),
+#             'True Rejections': x['True Rejections'].mean(),
+#             'Total Rejections': x['Total Rejections'].mean()
+#         })
+#     )
+#     res_p_summary = result_sim_parallel.groupby(['m', 'm0_fraction', 'L', 'scheme', 'method']).apply(
+#         lambda x: pd.Series({
+#             'Power': x['Power'].mean(),
+#             'True Rejections': x['True Rejections'].mean(),
+#             'Total Rejections': x['Total Rejections'].mean()
+#         })
+#     )
+#     print(res_np_summary['Power'])
+#     print(res_p_summary['Power'])
+#     pd.testing.assert_frame_equal(res_np_summary, res_p_summary)

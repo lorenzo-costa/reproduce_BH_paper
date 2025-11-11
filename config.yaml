@@ -7,7 +7,7 @@ data_dir: "data/"
 figures_dir: "results/figures/"
 
 # --- sim params ---
-nsim: 20000
+nsim: 2000
 alpha: 0.05
 m: [4, 8, 16, 32, 64]
 m0: [0.75, 0.5, 0.25, 0.0]
