@@ -5,3 +5,6 @@ __pycache__
 *.pkl
 *.csv
 .ruff_cache
+*.pdf
+*.png
+results/figures/*
