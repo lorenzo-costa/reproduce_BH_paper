@@ -8,14 +8,14 @@ Note, for project 2 I just naively implemented parallelisation without profiling
 This is the most obvious speed up which drives down the computational complexity by almost 50x.
 2) According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `special.erfc(np.abs(z_scores) / np.sqrt(2))`
 3) Profiler shows that the next bottleneck are the functions computing the metrics (e.g. FDR). This is already vectorised, the next thing I can do it to use `numba` to compile the code in C. This adds a bit of overhead at the beginning (because of compilation) but runs faster (especially as `nsim` grows)
-4) Profiler shows next bottleneck is the function `generate_mean` to generate the non-zero null hypothesis. As before this is already vectorised and to make it faster I can compile it in C using numba. For this I also need to modify my function because numba doesn't like me passing a string to the function.
+4) Profiler shows next bottleneck is the function `generate_mean` to generate the non-zero null hypothesis. As before this is already vectorised and to make it faster I can compile it in C using numba. This can be improve by pre-allocating memory 
 
 On 1k simulation runs (note all of these return the same results up to numerical approximation):
 - Old version with parallelization takes $18.9s \pm 0.28$
 - Removing pd concatenation takes $34.7 \pm 0.15$ and $17.9s\pm 0.12$ 
 - Changing to erf takes $24.7s \pm 0.18$ and $16.9s \pm 0.63$ with parallelization
-- Moving to numba for metrics takes $18.6\pm 0.17$ and $16.5\pm 0.44$. As expected the improvement with parallelisation slows down as the runtime of each iteration decreases
-- 
+- Moving to numba for metrics takes $18.6\pm 0.17$ and $16.5\pm 0.44$. 
+- Compiling generate means with numba speeds this up to $16.3s \pm 0.23$ and $17.4s\pm 0.28$ with parallelisation. As expected the improvement with parallelisation slows down as the runtime of each iteration decreases, especially for $n_{sim}$ small. For instance on 2k simulations we have $27.8s$ with parallelisation and $34.1s$ without.
 
 ### Computational complexity analysis
 The parameters I am changing throughout the study are:

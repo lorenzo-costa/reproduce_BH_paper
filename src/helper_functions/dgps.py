@@ -174,5 +174,6 @@ def generate_means(m, m0, scheme, L):
     means[counts[0] + counts[1] + counts[2] : counts[0] + counts[1] + counts[2]+counts[3]] = levels[3]
 
     return means
+
 def compute_p_values(z_scores):
     return special.erfc(np.abs(z_scores) / np.sqrt(2))

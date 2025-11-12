@@ -13,10 +13,27 @@ from multiprocessing import Pool, cpu_count
 import os
 
 
-def run_scenario(samples, m0_fraction, L, scheme, method, alpha, metrics, rng=None):
+scheme_dict = {
+    "D": 1,
+    "E": 2,
+    "I": 3,
+}
+
+def run_scenario(samples, 
+                 m0_fraction, 
+                 L, 
+                 scheme, 
+                 method, 
+                 alpha, 
+                 metrics, 
+                 means, 
+                 rng=None):
+    
     m = samples.shape[0]
     m0 = int(m * m0_fraction)
-    means = generate_means(m=m, m0=m0, scheme=scheme, L=L, rng=rng)
+    # numba doesn't like strings so pass an int
+    means[:m-m0] = generate_means(m=m, m0=m0, scheme=scheme_dict[scheme], L=L)
+    rng.shuffle(means)
     # uses property of Gaussian X ~ N(mu, 1) => X = mu + Z, Z ~ N(0,1)
     shifted_samples = samples + means
     p_values = compute_p_values(shifted_samples)
@@ -55,6 +72,9 @@ def run_single_simulation(args):
     for m_i in m:
         samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
         samples_dict[m_i] = samples
+        # by generating this now it pre-allocates memory and we do not need to 
+        # do for each scenario
+        means = np.zeros(m_i)
 
         for m0_i, L_i, scheme_i, method_i in itertools.product(
             m0_fraction, L, scheme, method
@@ -68,6 +88,7 @@ def run_single_simulation(args):
                 alpha=alpha,
                 metrics=metrics,
                 rng=rng,
+                means=means
             )
             scenario_out["nsim"] = i + 1
             results.append(scenario_out)
@@ -274,6 +295,7 @@ def run_simulation(
                 samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
                 # TODO: handle this better to speed up code
                 samples_list.append(samples)
+                means = np.zeros(m_i)
                 for m0_i, L_i, scheme_i, method_i in itertools.product(
                     m0_fraction, L, scheme, method
                 ):
@@ -286,12 +308,11 @@ def run_simulation(
                         alpha=alpha,
                         metrics=metrics,
                         rng=rng,
+                        means=means
                     )
                     scenario_out["nsim"] = i + 1
-                    # TODO: Optimize this concatenation
-                    # this creates a monstrous bottleneck, luckyly the parallel version avoids it
-                    # may easily get a 50x speedup by gettign this right.
                     out.append(scenario_out)
                     pbar.update(1)
+                    
     out = pd.DataFrame(out)
     return out, samples_list
