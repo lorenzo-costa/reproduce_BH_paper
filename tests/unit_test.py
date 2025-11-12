@@ -13,6 +13,12 @@ from src.helper_functions.metrics import (
 )
 import numpy as np
 
+scheme_dict = {
+    "D": 1,
+    "E": 2,
+    "I": 3,
+}
+
 
 # Test the normal data generator
 def test_normal_data_generator():
@@ -160,8 +166,8 @@ def test_benjamini_hochberg_correction(pvals, alpha, expected):
     ],
 )
 def test_generate_means(m, m0, scheme, L, expected):
-    rng = np.random.default_rng(42)
-    means = generate_means(m, m0, scheme, L, rng=rng)
+    means = np.zeros(m)
+    means[:m-m0] = generate_means(m, m0, scheme_dict[scheme], L)
     # Check that the means contain the expected values (ignoring order)
     if expected is not None:
         for val in np.unique(expected):

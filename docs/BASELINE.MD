@@ -9,6 +9,7 @@ This is the most obvious speed up which drives down the computational complexity
 2) According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `special.erfc(np.abs(z_scores) / np.sqrt(2))`
 3) Profiler shows that the next bottleneck are the functions computing the metrics (e.g. FDR). This is already vectorised, the next thing I can do it to use `numba` to compile the code in C. This adds a bit of overhead at the beginning (because of compilation) but runs faster (especially as `nsim` grows)
 4) Profiler shows next bottleneck is the function `generate_mean` to generate the non-zero null hypothesis. As before this is already vectorised and to make it faster I can compile it in C using numba. This can be improve by pre-allocating memory 
+5) profile now shows the main bottleneck is the saving the csv
 
 On 1k simulation runs (note all of these return the same results up to numerical approximation):
 - Old version with parallelization takes $18.9s \pm 0.28$

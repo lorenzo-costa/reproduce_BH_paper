@@ -95,8 +95,8 @@ class NormalGenerator(DataGenerator):
     def generate(self, n=None, rng=None):
         if rng is None:
             rng = np.random.default_rng()
-        if n is None:
-            n = self.loc.shape[0] if isinstance(self.loc, np.ndarray) else 1
+        # if n is None:
+        #     n = self.loc.shape[0] if isinstance(self.loc, np.ndarray) else 1
         return rng.normal(self.loc, self.scale, n)
 
     @property
@@ -137,30 +137,32 @@ def generate_means(m, m0, scheme, L):
     >>> means
     array([0., 0., 0., 0.])
     """
-
+    
     m1 = m - m0
     means = np.zeros(m1)
     if m0 == m:
         return means
 
     levels = np.array([L / 4, L / 2, 3 * L / 4, L])
-
+    
+    base = m1 / 10
     if scheme == 1:  # Linearly Decreasing
         # more hp closer to 0. divide non nulls as: 4k, 3k, 2k, k
         # sum = 10k = non nulls, so k = non-nulls/10
-        base = m1 / 10
         counts = np.array([4 * base, 3 * base, 2 * base, base])
     elif scheme == 2:  # Equal
-        counts = np.full(4, m1 / 4)
+        counts = np.array([m1 / 4, m1 / 4, m1 / 4, m1 / 4])
     else:
         base = m1 / 10
         counts = np.array([base, 2 * base, 3 * base, 4 * base])
 
     for i in range(len(counts)):
         counts[i] = int(counts[i])
+    # counts = counts.astype(int)
 
     # Adjust for rounding errors
     diff = m1 - counts.sum()
+    
     if diff > 0:
         for i in range(diff):
             counts[-1 - i] += 1
@@ -172,7 +174,6 @@ def generate_means(m, m0, scheme, L):
     means[counts[0] : counts[0] + counts[1]] = levels[1]
     means[counts[0] + counts[1] : counts[0] + counts[1] + counts[2]] = levels[2]
     means[counts[0] + counts[1] + counts[2] : counts[0] + counts[1] + counts[2]+counts[3]] = levels[3]
-
     return means
 
 def compute_p_values(z_scores):
