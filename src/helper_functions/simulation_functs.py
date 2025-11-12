@@ -263,38 +263,38 @@ def run_simulation(
     out = pd.DataFrame()
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
-    with tqdm(total=total_runs, desc="Running simulations") as pbar:
-        for i in range(nsim):
-            if (i + 1) in save_points:
-                out.to_csv(
-                    f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
-                    index=False,
-                )
+    # with tqdm(total=total_runs, desc="Running simulations") as pbar:
+    for i in range(nsim):
+        if (i + 1) in save_points:
+            out.to_csv(
+                f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
+                index=False,
+            )
 
-            for m_i in m:
-                samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
-                # TODO: handle this better to speed up code
-                samples_list.append(samples)
-                for m0_i, L_i, scheme_i, method_i in itertools.product(
-                    m0_fraction, L, scheme, method
-                ):
-                    scenario_out = run_scenario(
-                        samples=samples,
-                        m0_fraction=m0_i,
-                        L=L_i,
-                        scheme=scheme_i,
-                        method=method_i,
-                        alpha=alpha,
-                        metrics=metrics,
-                        rng=rng,
-                    )
-                    scenario_out["nsim"] = i + 1
-                    # TODO: Optimize this concatenation
-                    # this creates a monstrous bottleneck, luckyly the parallel version avoids it
-                    # may easily get a 50x speedup by gettign this right.
-                    out = pd.concat(
-                        [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True
-                    )
-                    pbar.update(1)
+        for m_i in m:
+            samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
+            # TODO: handle this better to speed up code
+            samples_list.append(samples)
+            for m0_i, L_i, scheme_i, method_i in itertools.product(
+                m0_fraction, L, scheme, method
+            ):
+                scenario_out = run_scenario(
+                    samples=samples,
+                    m0_fraction=m0_i,
+                    L=L_i,
+                    scheme=scheme_i,
+                    method=method_i,
+                    alpha=alpha,
+                    metrics=metrics,
+                    rng=rng,
+                )
+                scenario_out["nsim"] = i + 1
+                # TODO: Optimize this concatenation
+                # this creates a monstrous bottleneck, luckyly the parallel version avoids it
+                # may easily get a 50x speedup by gettign this right.
+                out = pd.concat(
+                    [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True
+                )
+                # pbar.update(1)
 
     return out, samples_list
