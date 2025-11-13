@@ -34,10 +34,10 @@ if __name__ == "__main__":
         
     parser = argparse.ArgumentParser()
     parser.add_argument("--nsim", type=int, default=None)
-    parser.add_argument("--parallel", default=1)
+    parser.add_argument("--parallel", default=None)
     args = parser.parse_args()
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
-    parallel = bool(int(args.parallel))
+    parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
 
     methods = [method_map[name]() for name in cfg["methods"]]
     alpha = cfg["alpha"]

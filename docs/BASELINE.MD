@@ -18,6 +18,11 @@ On 1k simulation runs (note all of these return the same results up to numerical
 - Moving to numba for metrics takes $18.6\pm 0.17$ and $16.5\pm 0.44$. 
 - Compiling generate means with numba speeds this up to $16.3s \pm 0.23$ and $17.4s\pm 0.28$ with parallelisation. As expected the improvement with parallelisation slows down as the runtime of each iteration decreases, especially for $n_{sim}$ small. For instance on 2k simulations we have $27.8s$ with parallelisation and $34.1s$ without.
 
+
+on 20k 343.216 seconds +/- 1.921
+
+
+
 ### Computational complexity analysis
 The parameters I am changing throughout the study are:
 - the number of hypothesis tested

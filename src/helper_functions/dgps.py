@@ -4,7 +4,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from scipy import stats
 from scipy import special
-from numba import njit, int64, float64
+from numba import njit, int64, float64, prange
 
 
 
@@ -156,7 +156,7 @@ def generate_means(m, m0, scheme, L):
         base = m1 / 10
         counts = np.array([base, 2 * base, 3 * base, 4 * base])
 
-    for i in range(len(counts)):
+    for i in prange(len(counts)):
         counts[i] = int(counts[i])
     # counts = counts.astype(int)
 

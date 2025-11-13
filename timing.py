@@ -12,12 +12,14 @@ args = parser.parse_args()
 n = args.n
 nsim = args.nsim
 parallel = args.parallel
-times = []
-for i in range(1, n + 1):
-    print(f"Run {i}")
-    start = time.time()
-    subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", str(parallel)])
-    end = time.time()
-    times.append(end - start)
 
-print(f"Average elapsed time: {sum(times) / len(times):.3f} seconds +/- {np.std(times):.3f} seconds")
+for parallel in [1, 0]:
+    times = []
+    for i in range(1, n + 1):
+        print(f"Run {i}")
+        start = time.time()
+        subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", str(parallel)])
+        end = time.time()
+        times.append(end - start)
+
+    print(f"Average elapsed time (parallel={parallel}): {sum(times) / len(times):.3f} seconds +/- {np.std(times):.3f} seconds")
