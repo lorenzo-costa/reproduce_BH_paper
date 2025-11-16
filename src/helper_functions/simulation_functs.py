@@ -184,7 +184,10 @@ def run_simulation_parallel(
     with Pool(processes=n_jobs) as pool:
         with tqdm(total=total_runs, desc="Running simulations") as pbar:
             for i, (results, samples_dict) in enumerate(
-                pool.imap(run_single_simulation, sim_args)
+                pool.imap(
+                    run_single_simulation, 
+                    sim_args,
+                    chunksize=30)
             ):
                 out.extend(results) 
                 samples_list.append(samples_dict)

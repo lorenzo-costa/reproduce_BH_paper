@@ -1,12 +1,12 @@
 ## Baseline document
 
 ### Run-time profiling
-The previous version took ~40 minutes on 20k simulations using parallelisation with 10 parallel processes. To get a better estimate I also run this without parallelisation but using 2k simulations which takes ~10 minutes (I know it's embarassingly slow).
-Note, for project 2 I just naively implemented parallelisation without profiling because the simulation was taking hours to run. This resulted in a faster but still suboptimal code. I will now try to make it better.
+The previous version took ~40 minutes on 20k simulations using parallelisation with 10 parallel processes. To get a better estimate I also run this without parallelisation but using 2k simulations which takes ~10 minutes (I know, very slow).
+Note, for project 2 I just naively implemented parallelisation without profiling because the simulation was taking hours to run. This resulted in a faster but still suboptimal code. 
 
-1) The profiler shows that the bottleneck is the repeated concatenation of pd. In my simulation loop I am extending the results dataset at each iteration using pd.concat. This clearly is super inefficient. Interstingly, the speed up I saw at the beginning using parallelisation came mostly from batching these concats rather than actual parallel computation. 
-This is the most obvious speed up which drives down the computational complexity by almost 50x.
-2) According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `special.erfc(np.abs(z_scores) / np.sqrt(2))`
+I will now try to make it better.
+1) The profiler shows that the bottleneck is the repeated concatenation of pandas DataFrames. In my original simulation loop I am extending the results dataset at each iteration using pd.concat. This is very inefficient because at each iteration $i$ of the loop I am concatenating a DataFrame of size $i$ which means that the time complexity of this operatio is $O(N_{sim}^2)$. This is the most obvious speed up. Interstingly, the speed up I saw when using parallelisation naively came mostly from batching these concats rather than actual parallel computation. 
+2) According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `special.erfc(np.abs(z_scores) / np.sqrt(2))`. Time complexity should be the same but 
 3) Profiler shows that the next bottleneck are the functions computing the metrics (e.g. FDR). This is already vectorised, the next thing I can do it to use `numba` to compile the code in C. This adds a bit of overhead at the beginning (because of compilation) but runs faster (especially as `nsim` grows)
 4) Profiler shows next bottleneck is the function `generate_mean` to generate the non-zero null hypothesis. As before this is already vectorised and to make it faster I can compile it in C using numba. This can be improve by pre-allocating memory 
 5) profile now shows the main bottleneck is the saving the csv

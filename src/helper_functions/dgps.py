@@ -177,4 +177,4 @@ def generate_means(m, m0, scheme, L):
     return means
 
 def compute_p_values(z_scores):
-    return special.erfc(np.abs(z_scores) / np.sqrt(2))
+    return 1 - special.erf(np.abs(z_scores) / np.sqrt(2))
