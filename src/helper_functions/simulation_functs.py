@@ -102,7 +102,7 @@ def run_simulation_parallel(
     metrics=None,
     nsim=100,
     rng=None,
-    results_dir="results/",
+    results_dir=None,
     n_jobs=None,
 ):
     """Run simulation study in parallel for all combinations of parameters.
@@ -163,7 +163,8 @@ def run_simulation_parallel(
     # ensure reproducible parallel random number generation
     child_seeds = rng.spawn(nsim)
 
-    os.makedirs(f"{results_dir}/raw", exist_ok=True)
+    if results_dir is not None:
+        os.makedirs(f"{results_dir}/raw", exist_ok=True)
 
     total_scenarios = len(m) * len(m0_fraction) * len(L) * len(scheme) * len(method)
     total_runs = nsim * total_scenarios
@@ -194,11 +195,12 @@ def run_simulation_parallel(
 
                 pbar.update(len(results))
 
-                if (i + 1) in save_points:
-                    pd.DataFrame(out).to_csv(
-                        f"{results_dir}/simulation_results_checkpoint_{i}.csv",
-                        index=False,
-                    )
+                if results_dir is not None:
+                    if (i + 1) in save_points:
+                        pd.DataFrame(out).to_csv(
+                            f"{results_dir}/simulation_results_checkpoint_{i}.csv",
+                            index=False,
+                        )
     out = pd.DataFrame(out)
     return out, samples_list
 
@@ -213,7 +215,7 @@ def run_simulation(
     metrics=None,
     nsim=100,
     rng=None,
-    results_dir="results/",
+    results_dir=None,
     show_progress=True,
     parallel=False,
     n_jobs=None,
@@ -285,11 +287,12 @@ def run_simulation(
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
     with tqdm(total=total_runs, desc="Running simulations", disable=not show_progress) as pbar:
         for i in range(nsim):
-            if (i + 1) in save_points:
-                pd.DataFrame(out).to_csv(
-                    f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
-                    index=False,
-                )
+            if results_dir is not None:
+                if (i + 1) in save_points:
+                    pd.DataFrame(out).to_csv(
+                        f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
+                        index=False,
+                    )
 
             for m_i in m:
                 samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
