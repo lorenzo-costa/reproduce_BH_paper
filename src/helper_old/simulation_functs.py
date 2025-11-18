@@ -4,7 +4,6 @@ import pandas as pd
 import itertools
 from tqdm import tqdm
 
-
 import numpy as np
 import pandas as pd
 import itertools
@@ -87,7 +86,8 @@ def run_simulation_parallel(
     rng=None,
     results_dir=None,
     n_jobs=None,
-    old=False
+    old=True,
+    verbose=True
 ):
     """Run simulation study in parallel for all combinations of parameters.
 
@@ -146,7 +146,6 @@ def run_simulation_parallel(
 
     # ensure reproducible parallel random number generation
     child_seeds = rng.spawn(nsim)
-
     if results_dir is not None:
         os.makedirs(f"{results_dir}/raw", exist_ok=True)
 
@@ -165,13 +164,13 @@ def run_simulation_parallel(
         out = pd.DataFrame()
     else:
         out = []
-        
+    
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
 
     with Pool(processes=n_jobs) as pool:
         # imap maintains order and enable progress tracking
-        with tqdm(total=total_runs, desc="Running simulations") as pbar:
+        with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
             for i, (results, samples_dict) in enumerate(
                 pool.imap(run_single_simulation, sim_args)
             ):
@@ -179,6 +178,7 @@ def run_simulation_parallel(
                     out = pd.concat([out, pd.DataFrame(results)], ignore_index=True)
                 else:
                     out.extend(results)
+                
                 samples_list.append(samples_dict)
 
                 pbar.update(len(results))
@@ -187,12 +187,12 @@ def run_simulation_parallel(
                     if (i + 1) in save_points:
                         if old:
                             out.to_csv(
-                                f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
+                                f"{results_dir}/simulation_results_checkpoint_{i}.csv",
                                 index=False,
                             )
                         else:
                             pd.DataFrame(out).to_csv(
-                                f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
+                                f"{results_dir}/simulation_results_checkpoint_{i}.csv",
                                 index=False,
                             )
 
@@ -212,7 +212,8 @@ def run_simulation(
     results_dir=None,
     parallel=False,
     n_jobs=None,
-    old=False
+    old=False,
+    verbose=True
 ):
     """Run simulation study for all combinations of parameters.
 
@@ -243,17 +244,19 @@ def run_simulation(
 
     if parallel:
         return run_simulation_parallel(
-            m,
-            m0_fraction,
-            L,
-            scheme,
-            method,
-            alpha,
-            metrics,
-            nsim,
-            rng,
-            results_dir,
-            n_jobs,
+            m=m,
+            m0_fraction=m0_fraction,
+            L=L,
+            scheme=scheme,
+            method=method,
+            alpha=alpha,
+            metrics=metrics,
+            nsim=nsim,
+            rng=rng,
+            results_dir=results_dir,
+            n_jobs=n_jobs,
+            old=old,
+            verbose=verbose,
         )
 
     if rng is None:
@@ -283,10 +286,10 @@ def run_simulation(
         
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
-    with tqdm(total=total_runs, desc="Running simulations") as pbar:
+    with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
         for i in range(nsim):
-            if results_dir is not None:
-                if (i + 1) in save_points:
+            if (i + 1) in save_points:
+                if results_dir is not None:
                     if old:
                         out.to_csv(
                             f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
@@ -319,12 +322,12 @@ def run_simulation(
                     # TODO: Optimize this concatenation
                     # this creates a monstrous bottleneck, luckyly the parallel version avoids it
                     # may easily get a 50x speedup by gettign this right.
-                    if not old:
-                        out.append(scenario_out)
-                    else:
+                    if old:
                         out = pd.concat(
-                            [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True
-                        )
+                        [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True
+                    )
+                    else:
+                        out.append(scenario_out)
                     pbar.update(1)
 
-    return out, samples_list
+    return pd.DataFrame(out), samples_list

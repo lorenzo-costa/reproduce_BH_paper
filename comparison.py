@@ -35,6 +35,8 @@ import numpy as np
 import yaml
 import time
 import argparse
+import subprocess
+import pickle
 
 method_map = {
     "Bonferroni": Bonferroni,
@@ -61,118 +63,79 @@ if __name__ == "__main__":
     L = cfg["L"]
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
-        
-    n_sim_list = [1e1, 5e1, 1e2, 2e2, 5e2, 1e3, 2e3, 5e3, 1e4, 5e4, 1e5, 5e5]
-    
+
+    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4]
+
     methods = [method_map[name]() for name in cfg["methods"]]
     methods_old = [method_map_old[name]() for name in cfg["methods"]]
     
     metrics = [Power(), TrueRejections(), RejectionsNumber(), FalseDiscoveryRate()]
     metrics_old = [PowerOld(), TrueRejectionsOld(), RejectionsNumberOld(), FalseDiscoveryRateOld()]
     
-    times_old = []
-    times_old_concat = []
-    times_new = []
-    times_new_parallel = []
+    times_old = {}
+    times_old_concat = {}
+    times_new = {}
+    times_new_parallel = {}
     
     os.makedirs(results_dir, exist_ok=True)
     
     for nsim in n_sim_list:
-        if os.path.exists(os.path.join(results_dir, f"timing_{int(nsim)}.json")):
+        if os.path.exists(os.path.join(results_dir, f"timing_{int(nsim)}.pkl")):
             print(f"Timing for nsim={int(nsim)} already exists, skipping...")
             continue
         nsim = int(nsim)
-        print(f"Running simulations with nsim={nsim}")
-        parser = argparse.ArgumentParser()
-        parser.add_argument(
-            "--parallel",
-            type=int,
-            choices=[0, 1],
-            help="Whether to run simulations in parallel (1) or sequentially (0). Overrides config file.",
-        )
-        args = parser.parse_args()
-        parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
-
-        start_time_new_parallel = time.time()
-        sim_out, samples_list = run_simulation(
-            nsim=nsim,
-            m=m,
-            m0_fraction=m0,
-            L=L,
-            scheme=scheme,
-            method=methods,
-            alpha=alpha,
-            rng=rng,
-            metrics=metrics,
-            parallel=False,
-        )
-        end_time_new_parallel = time.time()
-        times_new_parallel.append((end_time_new_parallel - start_time_new_parallel))
-        print(f"New simulation function (parallel) took {end_time_new_parallel - start_time_new_parallel:.2f} seconds.")
-
-        start_time_new = time.time()
-        sim_out, samples_list = run_simulation(
-            nsim=nsim,
-            m=m,
-            m0_fraction=m0,
-            L=L,
-            scheme=scheme,
-            method=methods,
-            alpha=alpha,
-            rng=rng,
-            metrics=metrics,
-            parallel=True,
-        )
-        end_time_new = time.time()
-        times_new.append((end_time_new - start_time_new))
-        print(f"New simulation function (sequential) took {end_time_new - start_time_new:.2f} seconds.")
-
-        start_time_old = time.time()
-        sim_out_old, samples_list_old = run_simulation_old(
-            nsim=nsim,
-            m=m,
-            m0_fraction=m0,
-            L=L,
-            scheme=scheme,
-            method=methods_old,
-            alpha=alpha,
-            rng=rng,
-            metrics=metrics_old,
-            parallel=True,
-        )
-        end_time_old = time.time()
-        times_old.append((end_time_old - start_time_old))
-        print(f"Old simulation function took {end_time_old - start_time_old:.2f} seconds.")
+        print(f"\nRunning simulations with nsim={nsim}")
         
-        start_time_old_concat = time.time()
-        sim_out_old, samples_list_old = run_simulation_old(
-            nsim=nsim,
-            m=m,
-            m0_fraction=m0,
-            L=L,
-            scheme=scheme,
-            method=methods_old,
-            alpha=alpha,
-            rng=rng,
-            metrics=metrics_old,
-            parallel=True,
-            old=True,
-        )
-        end_time_old_concat = time.time()
-        times_old_concat.append((end_time_old_concat - start_time_old_concat))
-        print(f"Old simulation function with concatenation took {end_time_old_concat - start_time_old_concat:.2f} seconds.")
+        start_time_new_parallel = np.ones(5)*1e10
+        end_time_new_parallel = np.zeros(5)
+        for i in range(5):
+            start_time_new_parallel[i] = time.time()
+            subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", "1", "--save", "0"])
+            end_time_new_parallel[i] = time.time()
+        
+        times_new_parallel[nsim] = (end_time_new_parallel - start_time_new_parallel)
+        print(f"New simulation function (parallel) took {np.max(end_time_new_parallel - start_time_new_parallel):.2f} seconds.")
 
-        with open(os.path.join(results_dir, f"timing_{nsim}.json"), "w") as f:
-            json.dump(
+        start_time_new = np.ones(5)*1e10
+        end_time_new = np.zeros(5)
+        for i in range(5):
+            start_time_new[i] = time.time()
+            subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", "0", "--save", "0"])
+            end_time_new[i] = time.time()
+            
+        times_new[nsim] = (end_time_new - start_time_new)
+        print(f"New simulation function (sequential) took {np.max(end_time_new - start_time_new):.2f} seconds.")
+
+        start_time_old = np.ones(5)*1e10
+        end_time_old = np.zeros(5)
+        for i in range(5):
+            start_time_old[i] = time.time()
+            subprocess.run(["python", "-m", "src.run_simulation_old", "--nsim", str(nsim), "--parallel", "1", "--save", "0", "--old", "0"])
+            end_time_old[i] = time.time()
+    
+        times_old[nsim] = (end_time_old - start_time_old)
+        print(f"Old simulation function took {np.max(end_time_old - start_time_old):.2f} seconds.")
+        
+        start_time_old_concat = np.ones(5)*1e10
+        end_time_old_concat = np.zeros(5)
+        for i in range(5):
+            start_time_old_concat[i] = time.time()
+            subprocess.run(["python", "-m", "src.run_simulation_old", "--nsim", str(nsim), "--parallel", "1", "--save", "0", "--old", "1"])
+            end_time_old_concat[i] = time.time()
+        
+        times_old_concat[nsim] = (end_time_old_concat - start_time_old_concat)
+        print(f"Old simulation function with concatenation took {np.max(end_time_old_concat - start_time_old_concat):.2f} seconds.")
+
+        with open(os.path.join(results_dir, f"timing_{nsim}.pkl"), "wb") as f:
+            pickle.dump(
                 {
-                    "n_sim_list": n_sim_list,
+                    "n_sim_list": nsim,
                     "times_old": end_time_old - start_time_old,
                     "times_old_concat": end_time_old_concat - start_time_old_concat,
                     "times_new": end_time_new - start_time_new,
                     "times_new_parallel": end_time_new_parallel - start_time_new_parallel,
                 },
                 f,
-                indent=4,
             )
     
     

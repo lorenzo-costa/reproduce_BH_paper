@@ -2,14 +2,14 @@
 Script to run the simulation study
 """
 
-from src.helper_functions.simulation_functs import run_simulation
-from src.helper_functions.metrics import (
+from src.helper_old.simulation_functs import run_simulation
+from src.helper_old.metrics import (
     Power,
     TrueRejections,
     RejectionsNumber,
     FalseDiscoveryRate,
 )
-from src.helper_functions.methods import (
+from src.helper_old.methods import (
     Bonferroni,
     BonferroniHochberg,
     BenjaminiHochberg,
@@ -31,15 +31,17 @@ if __name__ == "__main__":
     # load config
     with open("config.yaml", "r") as f:
         cfg = yaml.safe_load(f)
-        
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--nsim", type=int, default=None)
     parser.add_argument("--parallel", default=None)
-    parser.add_argument('--save', default=None)
+    parser.add_argument("--save", default=None)
+    parser.add_argument('--old', default=None)
     args = parser.parse_args()
-    save = bool(int(args.save)) if args.save is not None else True
+    save = bool(int(args.save)) if args.save is not None else False
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
     parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
+    old = bool(int(args.old)) if args.old is not None else False
 
     methods = [method_map[name]() for name in cfg["methods"]]
     alpha = cfg["alpha"]
@@ -49,7 +51,7 @@ if __name__ == "__main__":
     L = cfg["L"]
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
-    
+
     if save:
         results_dir = cfg.get("results_dir", "results/")
         data_dir = cfg.get("data_dir", "data/")
@@ -70,11 +72,11 @@ if __name__ == "__main__":
         metrics=metrics,
         results_dir=data_dir + "/simulated/" if save else None,
         parallel=parallel,
+        old=old,
     )
 
     if save:
         sim_out.to_csv(f"{data_dir}/simulated/full_simulation_results.csv", index=False)
-        
         with open(f"{data_dir}/simulated/simulation_samples.pkl", "wb") as f:
             pickle.dump(samples_list, f)
     

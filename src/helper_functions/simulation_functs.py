@@ -104,6 +104,7 @@ def run_simulation_parallel(
     rng=None,
     results_dir=None,
     n_jobs=None,
+    verbose=True,
 ):
     """Run simulation study in parallel for all combinations of parameters.
 
@@ -183,7 +184,7 @@ def run_simulation_parallel(
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
 
     with Pool(processes=n_jobs) as pool:
-        with tqdm(total=total_runs, desc="Running simulations") as pbar:
+        with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
             for i, (results, samples_dict) in enumerate(
                 pool.imap(
                     run_single_simulation, 
@@ -216,7 +217,7 @@ def run_simulation(
     nsim=100,
     rng=None,
     results_dir=None,
-    show_progress=True,
+    verbose=True,
     parallel=False,
     n_jobs=None,
 ):
@@ -249,17 +250,18 @@ def run_simulation(
 
     if parallel:
         return run_simulation_parallel(
-            m,
-            m0_fraction,
-            L,
-            scheme,
-            method,
-            alpha,
-            metrics,
-            nsim,
-            rng,
-            results_dir,
-            n_jobs,
+            m=m,
+            m0_fraction=m0_fraction,
+            L=L,
+            scheme=scheme,
+            method=method,
+            alpha=alpha,
+            metrics=metrics,
+            nsim=nsim,
+            rng=rng,
+            results_dir=results_dir,
+            n_jobs=n_jobs,
+            verbose=verbose
         )
 
     if rng is None:
@@ -285,7 +287,7 @@ def run_simulation(
     out = []
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
-    with tqdm(total=total_runs, desc="Running simulations", disable=not show_progress) as pbar:
+    with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
         for i in range(nsim):
             if results_dir is not None:
                 if (i + 1) in save_points:
