@@ -194,7 +194,7 @@ class TrueRejections(Metric):
         truth_mask = true_values != 0
         true_rejections = np.sum(rejected[truth_mask])
 
-        return true_rejections
+        return float(true_rejections)
 
 
 class RejectionsNumber(Metric):

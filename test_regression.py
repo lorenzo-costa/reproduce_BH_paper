@@ -29,12 +29,15 @@ from src.helper_old.methods import (
     BenjaminiHochberg as BenjaminiHochbergOld,
 )
 
+from src.helper_functions.analyse_functions import aggregate_results
+
 import json
 import os
 import numpy as np
 import yaml
 import time
 import argparse
+import pandas as pd
 
 method_map = {
     "Bonferroni": Bonferroni,
@@ -60,26 +63,16 @@ if __name__ == "__main__":
     m0 = cfg["m0"]
     L = cfg["L"]
     scheme = cfg["scheme"]
-    rng = np.random.default_rng(cfg["rng_seed"])
+    
         
-    nsim = 1000
+    nsim = 10000
     methods = [method_map[name]() for name in cfg["methods"]]
     methods_old = [method_map_old[name]() for name in cfg["methods"]]
     
     metrics = [Power(), TrueRejections(), RejectionsNumber(), FalseDiscoveryRate()]
     metrics_old = [PowerOld(), TrueRejectionsOld(), RejectionsNumberOld(), FalseDiscoveryRateOld()]
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--parallel",
-        type=int,
-        choices=[0, 1],
-        help="Whether to run simulations in parallel (1) or sequentially (0). Overrides config file.",
-    )
-    args = parser.parse_args()
-    parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
-
-    
+    rng1 = np.random.default_rng(cfg["rng_seed"])
     sim_out_new, samples_list = run_simulation(
         nsim=nsim,
         m=m,
@@ -88,11 +81,12 @@ if __name__ == "__main__":
         scheme=scheme,
         method=methods,
         alpha=alpha,
-        rng=rng,
+        rng=rng1,
         metrics=metrics,
         parallel=False,
     )
     
+    rng2 = np.random.default_rng(cfg["rng_seed"])
     sim_out_new_parallel, samples_list_parallel = run_simulation(
         nsim=nsim,
         m=m,
@@ -101,11 +95,12 @@ if __name__ == "__main__":
         scheme=scheme,
         method=methods,
         alpha=alpha,
-        rng=rng,
+        rng=rng2,
         metrics=metrics,
         parallel=True,
     )
     
+    rng3 = np.random.default_rng(cfg["rng_seed"])
     sim_out_old, samples_list_old = run_simulation_old(
         nsim=nsim,
         m=m,
@@ -114,12 +109,13 @@ if __name__ == "__main__":
         scheme=scheme,
         method=methods_old,
         alpha=alpha,
-        rng=rng,
+        rng=rng3,
         metrics=metrics_old,
         parallel=True,
         old=False
     )
     
+    rng4 = np.random.default_rng(cfg["rng_seed"])
     sim_out_old_concat, samples_list_old_concat = run_simulation_old(
         nsim=nsim,
         m=m,
@@ -128,11 +124,24 @@ if __name__ == "__main__":
         scheme=scheme,
         method=methods_old,
         alpha=alpha,
-        rng=rng,
+        rng=rng4,
         metrics=metrics_old,
-        parallel=parallel,
+        parallel=True,
         old=True,
     )
     
+    agg_new = sim_out_new.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
+    agg_new_parallel = sim_out_new_parallel.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
+    agg_old = sim_out_old.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
+    agg_old_concat = sim_out_old_concat.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
     
+    for metric in metrics:
+        metric = metric.name
+        if not np.allclose(agg_new[metric], agg_old[metric], atol=1e-4):
+            print(f"Discrepancy found in metric {metric} between new and old simulation!")
+            print(np.max(np.abs(agg_new[metric] - agg_old[metric])))
+        if not np.allclose(agg_new_parallel[metric], agg_old[metric], atol=1e-4):
+            print(f"Discrepancy found in metric {metric} between new parallel and old simulation!")
+        if not np.allclose(agg_old_concat[metric], agg_old[metric], atol=1e-4):
+            print(f"Discrepancy found in metric {metric} between old concatenated and old simulation!")
     

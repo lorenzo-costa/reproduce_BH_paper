@@ -18,6 +18,7 @@ def run_scenario(samples, m0_fraction, L, scheme, method, alpha, metrics, rng=No
     means = generate_means(m=m, m0=m0, scheme=scheme, L=L, rng=rng)
     # uses property of Gaussian X ~ N(mu, 1) => X = mu + Z, Z ~ N(0,1)
     shifted_samples = samples + means
+    rng.shuffle(shifted_samples)
     p_values = compute_p_values(shifted_samples)
     rejected = method(p_values, alpha)
 
@@ -195,7 +196,7 @@ def run_simulation_parallel(
                                 f"{results_dir}/simulation_results_checkpoint_{i}.csv",
                                 index=False,
                             )
-
+    out = pd.DataFrame(out)
     return out, samples_list
 
 
@@ -329,5 +330,5 @@ def run_simulation(
                     else:
                         out.append(scenario_out)
                     pbar.update(1)
-
-    return pd.DataFrame(out), samples_list
+    out = pd.DataFrame(out)
+    return out, samples_list
