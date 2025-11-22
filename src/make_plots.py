@@ -7,6 +7,9 @@ from src.helper_functions.plot_functions import plot_grid, plot_boxplot, plot_wi
 import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
+import pickle
+import os
+import numpy as np
 
 func_map = {
     "plot_with_bands": plot_with_bands,
@@ -63,3 +66,47 @@ if __name__ == "__main__":
             name_conversion=name_conversion,
         )
         print(f"Plot {plot_name} saved.")
+    
+    # plot timing comparison
+    timing_dir = "results/comparison"
+    timing_results = []
+    
+    for root, _, files in os.walk(timing_dir):
+        for fname in files:
+            if fname.lower().endswith(".pkl"):
+                path = os.path.join(root, fname)
+                with open(path, "rb") as fh:
+                    try:
+                        timing_results.append(pickle.load(fh))
+                    except Exception as e:
+                        print(f"Failed to load {path}: {e}")
+
+    all_results = sorted(timing_results, key=lambda x: x['n_sim_list'])
+    
+    time_old = [all_results[i]['times_old'] for i in range(len(all_results))]
+    time_old_mean = np.mean(time_old, axis=1)
+    time_new = [all_results[i]['times_new'] for i in range(len(all_results))]
+    time_new_mean = np.mean(time_new, axis=1)
+    time_old_concat = [all_results[i]['times_old_concat'] for i in range(len(all_results))]
+    time_old_concat_mean = np.mean(time_old_concat, axis=1)
+    time_new_parallel = [all_results[i]['times_new_parallel'] for i in range(len(all_results))]
+    time_new_parallel_mean = np.mean(time_new_parallel, axis=1)
+    n_sim_list = [all_results[i]['n_sim_list'] for i in range(len(all_results))]
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(n_sim_list, time_old_mean, marker='o', label='Old Method')
+    ax.plot(n_sim_list, time_new_mean, marker='o', label='New Method')
+    ax.plot(n_sim_list, time_old_concat_mean, marker='o', label='Old Method (Concat)')
+    ax.plot(n_sim_list, time_new_parallel_mean, marker='o', label='New Method (Parallel)')
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Number of Simulations")
+    ax.set_ylabel("Time (seconds)")
+    ax.legend()
+    plt.title("Simulation Timing Comparison")
+
+    if output_path is not None:
+        plt.savefig(output_path + "timing.png", dpi=300, bbox_inches="tight")
+        plt.savefig(output_path + "timing.pdf", dpi=300, bbox_inches="tight")
+    else:
+        plt.show()

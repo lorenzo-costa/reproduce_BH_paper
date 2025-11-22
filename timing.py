@@ -18,7 +18,12 @@ for parallel in [1, 0]:
     for i in range(1, n + 1):
         print(f"Run {i}")
         start = time.time()
-        subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", str(parallel)])
+        subprocess.run(["python", "-m", "src.run_simulation", 
+                        "--nsim", str(nsim), 
+                        "--parallel", str(parallel),
+                       "--results_dir", "results_timing/",
+                       "--data_dir", "data_timing/"])
+        
         end = time.time()
         times.append(end - start)
 

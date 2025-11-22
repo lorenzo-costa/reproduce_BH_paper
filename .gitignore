@@ -10,3 +10,4 @@ __pycache__
 profile.stats
 temp.ipynb
 timing_*.json
+.DS_Store

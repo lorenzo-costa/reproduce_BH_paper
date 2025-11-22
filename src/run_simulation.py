@@ -36,7 +36,10 @@ if __name__ == "__main__":
     parser.add_argument("--nsim", type=int, default=None)
     parser.add_argument("--parallel", default=None)
     parser.add_argument('--save', default=None)
+    parser.add_argument('--results_dir', type=str, default=None)
+    parser.add_argument('--data_dir', type=str, default=None)
     args = parser.parse_args()
+
     save = bool(int(args.save)) if args.save is not None else True
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
     parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
@@ -51,8 +54,8 @@ if __name__ == "__main__":
     rng = np.random.default_rng(cfg["rng_seed"])
     
     if save:
-        results_dir = cfg.get("results_dir", "results/")
-        data_dir = cfg.get("data_dir", "data/")
+        results_dir = args.results_dir if args.results_dir is not None else cfg.get("results_dir", "results/")
+        data_dir = args.data_dir if args.data_dir is not None else cfg.get("data_dir", "data/")
     else:
         results_dir = None
         data_dir = None

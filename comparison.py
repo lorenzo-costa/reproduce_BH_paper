@@ -64,7 +64,7 @@ if __name__ == "__main__":
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
 
-    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4]
+    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 5e4, 1e5]
 
     methods = [method_map[name]() for name in cfg["methods"]]
     methods_old = [method_map_old[name]() for name in cfg["methods"]]
@@ -90,7 +90,12 @@ if __name__ == "__main__":
         end_time_new_parallel = np.zeros(5)
         for i in range(5):
             start_time_new_parallel[i] = time.time()
-            subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", "1", "--save", "0"])
+            subprocess.run(["python", "-m", "src.run_simulation", 
+                            "--nsim", str(nsim), 
+                            "--parallel", "1", 
+                            "--save", "1",
+                            "--results_dir", "results_timing/",
+                            "--data_dir", "data_timing/"])
             end_time_new_parallel[i] = time.time()
         
         times_new_parallel[nsim] = (end_time_new_parallel - start_time_new_parallel)
@@ -100,7 +105,12 @@ if __name__ == "__main__":
         end_time_new = np.zeros(5)
         for i in range(5):
             start_time_new[i] = time.time()
-            subprocess.run(["python", "-m", "src.run_simulation", "--nsim", str(nsim), "--parallel", "0", "--save", "0"])
+            subprocess.run(["python", "-m", "src.run_simulation", 
+                            "--nsim", str(nsim), 
+                            "--parallel", "0", 
+                            "--save", "1",
+                            "--results_dir", "results_timing/",
+                            "--data_dir", "data_timing/"])
             end_time_new[i] = time.time()
             
         times_new[nsim] = (end_time_new - start_time_new)
@@ -110,7 +120,13 @@ if __name__ == "__main__":
         end_time_old = np.zeros(5)
         for i in range(5):
             start_time_old[i] = time.time()
-            subprocess.run(["python", "-m", "src.run_simulation_old", "--nsim", str(nsim), "--parallel", "1", "--save", "0", "--old", "0"])
+            subprocess.run(["python", "-m", "src.run_simulation_old", 
+                            "--nsim", str(nsim), 
+                            "--parallel", "1", 
+                            "--save", "1", 
+                            "--old", "0",
+                            "--results_dir", "results_timing/",
+                            "--data_dir", "data_timing/"])
             end_time_old[i] = time.time()
     
         times_old[nsim] = (end_time_old - start_time_old)
@@ -120,7 +136,13 @@ if __name__ == "__main__":
         end_time_old_concat = np.zeros(5)
         for i in range(5):
             start_time_old_concat[i] = time.time()
-            subprocess.run(["python", "-m", "src.run_simulation_old", "--nsim", str(nsim), "--parallel", "1", "--save", "0", "--old", "1"])
+            subprocess.run(["python", "-m", "src.run_simulation_old", 
+                            "--nsim", str(nsim), 
+                            "--parallel", "1", 
+                            "--save", "1", 
+                            "--old", "1",
+                            "--results_dir", "results_timing/",
+                            "--data_dir", "data_timing/"])
             end_time_old_concat[i] = time.time()
         
         times_old_concat[nsim] = (end_time_old_concat - start_time_old_concat)
