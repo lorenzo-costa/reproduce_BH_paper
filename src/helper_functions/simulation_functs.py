@@ -189,7 +189,7 @@ def run_simulation_parallel(
                 pool.imap(
                     run_single_simulation, 
                     sim_args,
-                    chunksize=100)
+                    chunksize=50)
             ):
                 out.extend(results) 
                 samples_list.append(samples_dict)

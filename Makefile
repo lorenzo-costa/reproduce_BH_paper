@@ -11,6 +11,8 @@ RESULTS=results
 
 all: simulate analyse figures
 
+temp: complexity benchmark
+
 # run simulations sequential
 simulate:
 	$(PYTHON) -m $(SRC).run_simulation
