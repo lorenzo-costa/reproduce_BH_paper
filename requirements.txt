@@ -4,7 +4,7 @@ cycler
 fonttools
 iniconfig
 kiwisolver
-matplotlib==3.10.6
+matplotlib
 numexpr
 numpy
 packaging
@@ -18,7 +18,6 @@ pytest
 python-dateutil
 pytz
 PyYAML
-ruff
 scipy
 seaborn
 six

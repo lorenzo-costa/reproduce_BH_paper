@@ -59,7 +59,7 @@ if __name__ == "__main__":
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
 
-    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 5e4, 1e5]
+    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 5e4]
     
     # go back to a single one because it takes too long
     n_repeats = 1
