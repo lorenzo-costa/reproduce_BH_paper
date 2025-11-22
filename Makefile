@@ -42,8 +42,10 @@ test:
 complexity:
 	$(PYTHON) comparison.py --target complexity
 	$(PYTHON) -m $(SRC).make_plots --target complexity
+	@echo "Complexity plot should now be in $(RESULTS)/figures"
 
 # benchmark
 benchmark:
 	$(PYTHON) comparison.py --target benchmark
 	$(PYTHON) -m $(SRC).make_plots --target benchmark
+	@echo "Benchmark plot should now be in $(RESULTS)/figures"

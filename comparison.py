@@ -66,7 +66,7 @@ if __name__ == "__main__":
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
 
-    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4]
+    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 2e4]
     
     # go back to a single one because it takes too long
     n_repeats = 1
@@ -168,7 +168,7 @@ if __name__ == "__main__":
                 end_time_old[i] = time.time()
         
             times_old[nsim] = (end_time_old - start_time_old)
-            print(f"Old simulation function took {np.max(end_time_old - start_time_old):.2f} seconds.")
+            print(f"Old simulation function took {np.max(end_time_old - start_time_old):.2f} seconds.\n")
 
             start_time_old_concat = np.ones(n_repeats)*1e10
             end_time_old_concat = np.zeros(n_repeats)

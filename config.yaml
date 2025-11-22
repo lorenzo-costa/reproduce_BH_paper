@@ -73,10 +73,7 @@ rcparams:
   xtick.labelsize: 8
   ytick.labelsize: 8
 
-line_colors:
-  "Bonferroni Correction": "#FFB000"
-  "Bonferroni-Hochberg Correction": "#DC267F"
-  "Benjamini-Hochberg Correction": "#648FFF"
+line_colors: ["#FFB000", "#DC267F", "#648FFF", "#2ACC65"]
 
 linestyles:
   "Bonferroni Correction": "-"

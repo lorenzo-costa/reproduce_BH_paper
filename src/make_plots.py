@@ -46,6 +46,9 @@ if __name__ == "__main__":
     print("Generating plots...")
     
     if target in ["all", "plots"]:
+        color_picks = colors[::len(colors)//len(linestyles)]
+        colors_dict = {name: color_picks[i] for i, name in enumerate(linestyles.keys())}
+        
         for plot in plots:
             grouped_stats = pd.read_csv(plot["data_dir"])
             plot_name = plot["name"]
@@ -75,7 +78,7 @@ if __name__ == "__main__":
                 ratio_variable=ratio_variable,
                 title=title,
                 save_path=output_path + plot_name,
-                colors=colors,
+                colors=colors_dict,
                 linestyles=linestyles,
                 name_conversion=name_conversion,
             )
@@ -113,16 +116,16 @@ if __name__ == "__main__":
 
         fig, ax = plt.subplots(figsize=(6, 4))
 
-        ax.plot(n_sim_list, time_mean, 'o-', label='New Method')
-        ax.plot(n_sim_list, fitted, '--', label = fr'Empirical New $O(n^{{{slope:.2f}}})$')
+        ax.plot(n_sim_list, time_mean, 'o-', label='Observed times', color=colors[0])
+        ax.plot(n_sim_list, fitted, '--', label = fr'Empirical interpolation $O(n^{{{slope:.2f}}})$', color=colors[1])
         # scale theoretical to be in same scale as data
-        ax.plot(n_sim_list, theoretical_complexity * (time_mean[0] / (n_sim_list[0] * k)), '--', label='Theoretical Complexity')
+        ax.plot(n_sim_list, theoretical_complexity * (time_mean[0] / (n_sim_list[0] * k)), '--', label='Theoretical Complexity', color=colors[2])
 
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.set_xlabel('n (log scale)')
         ax.set_ylabel('Runtime (log scale)')
-        ax.set_title('Empirical Complexity: Runtime vs n (log-log)')
+        ax.set_title('Complexity analysis: Runtime vs n (log-log)')
         ax.legend()
         plt.tight_layout()
         if output_path is not None:
@@ -160,10 +163,10 @@ if __name__ == "__main__":
         n_sim_list = [all_results[i]['nsim'] for i in range(len(all_results))]
 
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.plot(n_sim_list, time_old_mean, marker='o', label='Old Method')
-        ax.plot(n_sim_list, time_new_mean, marker='o', label='New Method')
-        ax.plot(n_sim_list, time_old_concat_mean, marker='o', label='Old Method - Concat')
-        ax.plot(n_sim_list, time_new_parallel_mean, marker='o', label='New Method - Parallel')
+        ax.plot(n_sim_list, time_old_mean, marker='o', label='Old Method', color=colors[0])
+        ax.plot(n_sim_list, time_new_mean, marker='o', label='New Method', color=colors[1])
+        ax.plot(n_sim_list, time_old_concat_mean, marker='o', label='Old Method - Concat', color=colors[2])
+        ax.plot(n_sim_list, time_new_parallel_mean, marker='o', label='New Method - Parallel', color=colors[3])
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_xlabel("Number of Simulations")
@@ -172,8 +175,8 @@ if __name__ == "__main__":
         plt.title("Simulation Timing Comparison")
 
         if output_path is not None:
-            plt.savefig(output_path + "timing.png", dpi=300, bbox_inches="tight")
-            plt.savefig(output_path + "timing.pdf", dpi=300, bbox_inches="tight")
+            plt.savefig(output_path + "benchmark.png", dpi=300, bbox_inches="tight")
+            plt.savefig(output_path + "benchmark.pdf", dpi=300, bbox_inches="tight")
         else:
             plt.show()
         print("complexity plot saved.")
