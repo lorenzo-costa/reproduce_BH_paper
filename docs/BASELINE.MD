@@ -6,7 +6,7 @@ For project 2 I just naively implemented parallelisation without profiling becau
 
 As the image below shows the main bottle neck is the Pandas DataFrame concatenation. Indeed in my code I was repeatedly concatenating pandas dataframes instead of using lists. This is very inefficient because at each iteration $i$ of the loop I am concatenating a DataFrame of size $i$ which means that the time complexity of this operatio is $O(N_{sim}^2)$. This is the most obvious speed up. Interstingly, the speed up I saw when using parallelisation naively came mostly from batching these concats rather than actual parallel computation. 
 
-![Alt text](../.results/figures/profiling_before_optimization.png)
+![profiling baseline](../results/figures/profiling_before_optimization.png)
 
 
 ### Computational complexity analysis
@@ -31,9 +31,10 @@ Breakdown of the procedure:
 			- compute the metrics.
 				each metric takes $O(m)$
 
-Note that for each iteration of $n_{sim}$ we loop over all values of $m$ (call them $m_{i}) and for each of those we run all the scenarios. If we denote as $n_{scenario}$ the number of scenarios and $K$ the number of metrics, the computational complexity is:
+Note that for each iteration of $n_{sim}$ we loop over all values of $m$ (call them $m_{i}$) and for each of those we run all the scenarios. If we denote as $n_{scenario}$ the number of scenarios and $n_{metrics}$ the number of metrics, the computational complexity is:
 
-$O\left(n_{sim} \cdot n_{scenarios} \cdot \sum m_{i}(\log m_{i}+K)\right)$
+$O\left(n_{sim} \cdot n_{scenarios} \cdot \sum (m_{i}\log m_{i}+n_{metrics})\right) = O(n_{sim}\cdot k)$
 
 In particular in our case we have 4 non-zero mean fractions, 3 scheme types, 2 non-zero mean levels, 3 methods.  It means we have $n_{scenario}=4*3*2*3 = 72$ different scenarios. The actual value of these parameters does not influence computational cost, what matter is how many different values we try.
-Note also that in this case the number of metrics compute is fixed at three, hence negligible for complexity analysis, but still relevant in practice  
+Note also that in this case the number of metrics compute is fixed at four, hence negligible for complexity analysis, but still relevant in practice.
+With $m_i \in [4, 8, 16, 32, 64]$ and $n_{metrics}=4$ we can compute the constant $k$ which comes out to be $k\approx 33k$. 
