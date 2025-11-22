@@ -27,6 +27,8 @@ On 1k simulation runs (note all of these return the same results up to numerical
 - Compiling `generate_means` with numba speeds this up to $16.3s \pm 0.23$ and $17.4s\pm 0.28$ with parallelisation. As expected the improvement with parallelisation slows down as the runtime of each iteration decreases, especially for $n_{sim}$ small. For instance on 2k simulations we have $27.8s$ with parallelisation and $34.1s$ without. Increasing the number of iterations also yield additional advantage by amortizing the compilation of numba functions.
 
 
+## Regression test
+The script `regression.py` runs validation tests to check if the different version produce the same results. When using parallelisation 
 
 
 on 20k 343.216 seconds +/- 1.921

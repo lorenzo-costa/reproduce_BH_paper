@@ -31,7 +31,7 @@ Breakdown of the procedure:
 			- compute the metrics.
 				each metric takes $O(m)$
 
-Note that for each iteration of $n_{sim}$ we loop over all values of $m$ and for each of those we run all the scenarios. If we denote as $n_{scenario}$ the number of scenarios and $K$ the number of metrics, the computational complexity is:
+Note that for each iteration of $n_{sim}$ we loop over all values of $m$ (call them $m_{i}) and for each of those we run all the scenarios. If we denote as $n_{scenario}$ the number of scenarios and $K$ the number of metrics, the computational complexity is:
 
 $O\left(n_{sim} \cdot n_{scenarios} \cdot \sum m_{i}(\log m_{i}+K)\right)$
 
