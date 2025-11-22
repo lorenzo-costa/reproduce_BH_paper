@@ -6,7 +6,7 @@ For project 2 I just naively implemented parallelisation without profiling becau
 
 As the image below shows the main bottle neck is the Pandas DataFrame concatenation. Indeed in my code I was repeatedly concatenating pandas dataframes instead of using lists. This is very inefficient because at each iteration $i$ of the loop I am concatenating a DataFrame of size $i$ which means that the time complexity of this operatio is $O(N_{sim}^2)$. This is the most obvious speed up. Interstingly, the speed up I saw when using parallelisation naively came mostly from batching these concats rather than actual parallel computation. 
 
-![Alt text](profiling_before_optimization.png)
+![Alt text](.results/figures/profiling_before_optimization.png)
 
 
 ### Computational complexity analysis
