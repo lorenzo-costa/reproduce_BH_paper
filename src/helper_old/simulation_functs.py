@@ -284,11 +284,13 @@ def run_simulation(
         out = pd.DataFrame()
     else:
         out = []
-        
+    
+    child_seeds = rng.spawn(nsim)
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
     with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
         for i in range(nsim):
+            rng_sim = np.random.default_rng(child_seeds[i])
             if (i + 1) in save_points:
                 if results_dir is not None:
                     if old:
@@ -303,7 +305,7 @@ def run_simulation(
                         )
 
             for m_i in m:
-                samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
+                samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng_sim)
                 # TODO: handle this better to speed up code
                 samples_list.append(samples)
                 for m0_i, L_i, scheme_i, method_i in itertools.product(
@@ -317,12 +319,9 @@ def run_simulation(
                         method=method_i,
                         alpha=alpha,
                         metrics=metrics,
-                        rng=rng,
+                        rng=rng_sim,
                     )
                     scenario_out["nsim"] = i + 1
-                    # TODO: Optimize this concatenation
-                    # this creates a monstrous bottleneck, luckyly the parallel version avoids it
-                    # may easily get a 50x speedup by gettign this right.
                     if old:
                         out = pd.concat(
                         [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True

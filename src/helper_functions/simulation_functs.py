@@ -280,6 +280,9 @@ def run_simulation(
         scheme = [scheme]
     if not isinstance(method, (list, np.ndarray)):
         method = [method]
+    
+    if results_dir is not None:
+        os.makedirs(f"{results_dir}/raw", exist_ok=True)
 
     total_scenarios = len(m) * len(m0_fraction) * len(L) * len(scheme) * len(method)
     total_runs = nsim * total_scenarios
@@ -301,7 +304,7 @@ def run_simulation(
                     )
 
             for m_i in m:
-                samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
+                samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng_sim)
                 samples_dict[m_i] = samples
                 for m0_i, L_i, scheme_i, method_i in itertools.product(
                     m0_fraction, L, scheme, method
