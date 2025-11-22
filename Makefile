@@ -11,22 +11,39 @@ RESULTS=results
 
 all: simulate analyse figures
 
-# Step 1: Run simulations
+# run simulations sequential
 simulate:
 	$(PYTHON) -m $(SRC).run_simulation
 
-# Step 2: analyze results
+# run simulations parallel
+parallel:
+	$(PYTHON) -m $(SRC).run_simulation --parallel true
+
+# analyze results
 analyse:
 	$(PYTHON) -m $(SRC).analyse_data
 
-# Step 3: Generate figures (optional if scripts already output plots)
+# Generate figures
 figures:
 	$(PYTHON) -m $(SRC).make_plots
 	@echo "Figures should now be in $(RESULTS)/figures"
 
-# Clean up caches
+# clean up caches
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 
+# run tests
 test:
 	pytest
+
+# profiling
+
+# complexity
+complexity:
+	$(PYTHON) comparison.py --target complexity
+	$(PYTHON) -m $(SRC).make_plots --target complexity
+
+# benchmark
+benchmark:
+	$(PYTHON) comparison.py --target benchmark
+	$(PYTHON) -m $(SRC).make_plots --target benchmark

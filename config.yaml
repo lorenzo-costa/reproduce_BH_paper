@@ -14,7 +14,7 @@ m0: [0.75, 0.5, 0.25, 0.0]
 L: [5, 10]
 scheme: ["E", "I", "D"]
 rng_seed: 42
-parallel: true
+parallel: false
 
 methods:
   - Bonferroni

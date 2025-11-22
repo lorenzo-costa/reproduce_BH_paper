@@ -60,6 +60,7 @@ if __name__ == "__main__":
         sim_out_old = pd.read_csv("data/timing_old/simulated/full_simulation_results.csv")
         sim_out_old_concat = pd.read_csv("data/timing_old_concat/simulated/full_simulation_results.csv")
         print("Loaded existing simulation results.")
+        
     except FileNotFoundError:
         print("Running simulations...")
 
