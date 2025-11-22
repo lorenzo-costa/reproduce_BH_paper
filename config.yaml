@@ -25,6 +25,7 @@ metrics:
   - Power
   - TrueRejections
   - RejectionsNumber
+  - FDR
 
 # -- analysis configuration ---
 analyse_scenario:

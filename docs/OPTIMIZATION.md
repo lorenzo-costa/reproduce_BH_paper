@@ -28,8 +28,4 @@ On 1k simulation runs (note all of these return the same results up to numerical
 
 
 ## Regression test
-The script `regression.py` runs validation tests to check if the different version produce the same results. When using parallelisation 
-
-
-on 20k 343.216 seconds +/- 1.921
-
+The script `regression.py` runs validation tests to check if the different version produce the same results. The results are (almost) exactly the same across simulations. This was achieved by using numpy's `rng.spawn` to spawn random seed to use across simulations. This maintains consistency between parallel and sequential functions. 

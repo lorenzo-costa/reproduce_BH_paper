@@ -94,7 +94,7 @@ if __name__ == "__main__":
                             "--parallel", "1", 
                             "--save", "1",
                             "--results_dir", "results_timing_new_parallel/",
-                            "--data_dir", "data_timing_new_parallel/"])
+                            "--data_dir", "data/timing_new_parallel/"])
             end_time_new_parallel[i] = time.time()
         
         times_new_parallel[nsim] = (end_time_new_parallel - start_time_new_parallel)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                             "--parallel", "0", 
                             "--save", "1",
                             "--results_dir", "results_timing_new/",
-                            "--data_dir", "data_timing_new/"])
+                            "--data_dir", "data/timing_new/"])
             end_time_new[i] = time.time()
             
         times_new[nsim] = (end_time_new - start_time_new)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                             "--save", "1", 
                             "--old", "0",
                             "--results_dir", "results_timing_old/",
-                            "--data_dir", "data_timing_old/"])
+                            "--data_dir", "data/timing_old/"])
             end_time_old[i] = time.time()
     
         times_old[nsim] = (end_time_old - start_time_old)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                             "--save", "1", 
                             "--old", "1",
                             "--results_dir", "results_timing_old_concat/",
-                            "--data_dir", "data_timing_old_concat/"])
+                            "--data_dir", "data/timing_old_concat/"])
             end_time_old_concat[i] = time.time()
         
         times_old_concat[nsim] = (end_time_old_concat - start_time_old_concat)
