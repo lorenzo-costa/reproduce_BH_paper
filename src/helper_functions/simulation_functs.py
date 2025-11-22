@@ -199,7 +199,7 @@ def run_simulation_parallel(
                 if results_dir is not None:
                     if (i + 1) in save_points:
                         pd.DataFrame(out).to_csv(
-                            f"{results_dir}/simulation_results_checkpoint_{i}.csv",
+                            f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
                             index=False,
                         )
     out = pd.DataFrame(out)
@@ -283,12 +283,15 @@ def run_simulation(
 
     total_scenarios = len(m) * len(m0_fraction) * len(L) * len(scheme) * len(method)
     total_runs = nsim * total_scenarios
+    
+    child_seeds = rng.spawn(nsim)
 
     out = []
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
     with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
         for i in range(nsim):
+            rng_sim = np.random.default_rng(child_seeds[i])
             samples_dict = {}
             if results_dir is not None:
                 if (i + 1) in save_points:
@@ -311,7 +314,7 @@ def run_simulation(
                         method=method_i,
                         alpha=alpha,
                         metrics=metrics,
-                        rng=rng,
+                        rng=rng_sim,
                     )
                     scenario_out["nsim"] = i + 1
                     out.append(scenario_out)

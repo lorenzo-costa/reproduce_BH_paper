@@ -10,12 +10,19 @@ import yaml
 import pickle
 import os
 import numpy as np
+from scipy.stats import linregress
 
 func_map = {
     "plot_with_bands": plot_with_bands,
     "plot_boxplot": plot_boxplot,
 }
 
+def fit_empirical_complexity(n_sim_list, time_mean):
+        log_n = np.log(n_sim_list)
+        log_time = np.log(time_mean)
+        slope, intercept, *_ = linregress(log_n, log_time)
+        fitted = np.exp(intercept) * np.power(n_sim_list, slope)
+        return slope, intercept, fitted
 
 if __name__ == "__main__":
     with open("config.yaml", "r") as f:
@@ -93,7 +100,7 @@ if __name__ == "__main__":
     time_new_parallel_mean = np.mean(time_new_parallel, axis=1)
     n_sim_list = [all_results[i]['n_sim_list'] for i in range(len(all_results))]
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(n_sim_list, time_old_mean, marker='o', label='Old Method')
     ax.plot(n_sim_list, time_new_mean, marker='o', label='New Method')
     ax.plot(n_sim_list, time_old_concat_mean, marker='o', label='Old Method (Concat)')
@@ -108,5 +115,37 @@ if __name__ == "__main__":
     if output_path is not None:
         plt.savefig(output_path + "timing.png", dpi=300, bbox_inches="tight")
         plt.savefig(output_path + "timing.pdf", dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+    print("Timing plot saved.")
+    
+    # plot empirical complexity fit
+    slope_new, intercept_new, fitted_new = fit_empirical_complexity(n_sim_list, time_new_mean)
+    fitted_new = np.exp(intercept_new) * np.power(n_sim_list, slope_new)
+
+    # using complexity from BASELINE.md
+    # $O\left(n_{sim} \cdot n_{scenarios} \cdot \sum m_{i}(\log m_{i}+K)\right)$
+    m = np.array([4, 8, 16, 32, 64])
+    k = ((m * np.log(m+3)).sum() * 72)
+    theoretical_complexity = np.array(n_sim_list) * k
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    ax.plot(n_sim_list, time_new_mean, 'o-', label='New Method')
+    ax.plot(n_sim_list, fitted_new, '--', label=f'Empirical New O(n^{slope_new:.2f})')
+    # scale theoretical to be in same scale as data
+    ax.plot(n_sim_list, theoretical_complexity * (time_new_mean[0] / (n_sim_list[0] * k)), '--', label='Theoretical Complexity')
+
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('n (log scale)')
+    ax.set_ylabel('Runtime (log scale)')
+    ax.set_title('Empirical Complexity: Runtime vs n (log-log)')
+    ax.legend()
+    plt.tight_layout()
+    
+    if output_path is not None:
+        plt.savefig(output_path + "complexity_analysis.png", dpi=300, bbox_inches="tight")
+        plt.savefig(output_path + "complexity_analysis.pdf", dpi=300, bbox_inches="tight")
     else:
         plt.show()
