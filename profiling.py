@@ -1,4 +1,5 @@
 import cProfile
+import os
 import pstats
 from src.helper_functions.simulation_functs import run_simulation
 from src.helper_functions.metrics import (
@@ -53,7 +54,8 @@ if __name__ == '__main__':
     parser.add_argument("--nsim", type=int, default=None)
     parser.add_argument("--parallel", default=1)
     args = parser.parse_args()
-    nsim = args.nsim if args.nsim is not None else cfg["nsim"]
+    # cannot run full 20k because old non-parallel version is too slow
+    nsim = args.nsim if args.nsim is not None else 2000 
     parallel = bool(int(args.parallel))
 
     methods = [method_map[name]() for name in cfg["methods"]]
@@ -71,33 +73,40 @@ if __name__ == '__main__':
 
     results_dir = cfg.get("results_dir", "results/")
     data_dir = cfg.get("data_dir", "data/")
+    
+    os.makedirs(results_dir + "profiling/", exist_ok=True)
 
-    with cProfile.Profile() as pr:
-        # sim_out, samples_list = run_simulation(
-        #     nsim=nsim,
-        #     m=m,
-        #     m0_fraction=m0,
-        #     L=L,
-        #     scheme=scheme,
-        #     method=methods,
-        #     alpha=alpha,
-        #     rng=rng,
-        #     metrics=metrics,
-        #     results_dir=data_dir + "/simulated/",
-        #     parallel=parallel,
-        # )
-        sim_out_old, samples_list_old = run_simulation_old(
-                nsim=nsim,
-                m=m,
-                m0_fraction=m0,
-                L=L,
-                scheme=scheme,
-                method=methods_old,
-                alpha=alpha,
-                rng=rng,
-                metrics=metrics_old,
-                parallel=True,
-                old=True
-            )
+    with cProfile.Profile() as pr_new:
+        sim_out, samples_list = run_simulation(
+            nsim=nsim,
+            m=m,
+            m0_fraction=m0,
+            L=L,
+            scheme=scheme,
+            method=methods,
+            alpha=alpha,
+            rng=rng,
+            metrics=metrics,
+            results_dir=None,
+            parallel=False,
+        )
+    pr_new.disable()
+    pr_new.dump_stats("results/profiling/profile_new.stats")
 
-    pr.dump_stats("profile.stats")
+    with cProfile.Profile() as pr_old:
+         sim_out_old, samples_list_old = run_simulation_old(
+            nsim=nsim,
+            m=m,
+            m0_fraction=m0,
+            L=L,
+            scheme=scheme,
+            method=methods_old,
+            alpha=alpha,
+            rng=rng,
+            metrics=metrics_old,
+            results_dir=None,
+            parallel=False,
+            old=True
+        )
+    pr_old.disable()
+    pr_old.dump_stats("results/profiling/profile_old.stats")
