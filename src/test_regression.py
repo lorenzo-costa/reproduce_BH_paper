@@ -93,6 +93,7 @@ if __name__ == "__main__":
             rng=rng1,
             metrics=metrics,
             parallel=False,
+            results_dir=None,
         )
         
         rng2 = np.random.default_rng(cfg["rng_seed"])
@@ -107,6 +108,7 @@ if __name__ == "__main__":
             rng=rng2,
             metrics=metrics,
             parallel=True,
+            results_dir=None,
         )
         
         rng3 = np.random.default_rng(cfg["rng_seed"])
@@ -121,7 +123,8 @@ if __name__ == "__main__":
             rng=rng3,
             metrics=metrics_old,
             parallel=True,
-            old=False
+            old=False,
+            results_dir=None,
         )
         
         rng4 = np.random.default_rng(cfg["rng_seed"])
@@ -137,6 +140,7 @@ if __name__ == "__main__":
             metrics=metrics_old,
             parallel=True,
             old=True,
+            results_dir=None,
         )
     
     agg_new = sim_out_new.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
