@@ -11,14 +11,16 @@ RESULTS=results
 
 all: simulate analyse figures
 
-temp: complexity benchmark
+parallel: parallel_simulate analyse figures
+
+runtime_analysis: complexity benchmark
 
 # run simulations sequential
 simulate:
 	$(PYTHON) -m $(SRC).run_simulation
 
 # run simulations parallel
-parallel:
+parallel_simulate:
 	$(PYTHON) -m $(SRC).run_simulation --parallel 1
 
 # analyze results
