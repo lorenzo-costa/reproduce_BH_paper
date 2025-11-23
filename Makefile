@@ -19,7 +19,7 @@ simulate:
 
 # run simulations parallel
 parallel:
-	$(PYTHON) -m $(SRC).run_simulation --parallel true
+	$(PYTHON) -m $(SRC).run_simulation --parallel 1
 
 # analyze results
 analyse:
@@ -27,7 +27,7 @@ analyse:
 
 # Generate figures
 figures:
-	$(PYTHON) -m $(SRC).make_plots
+	$(PYTHON) -m $(SRC).make_plots --target plots
 	@echo "Figures should now be in $(RESULTS)/figures"
 
 # clean up caches

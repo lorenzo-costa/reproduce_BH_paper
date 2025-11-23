@@ -20,6 +20,7 @@ import numpy as np
 import yaml
 import time
 import argparse
+import os
 
 method_map = {
     "Bonferroni": Bonferroni,
@@ -37,11 +38,13 @@ if __name__ == "__main__":
     parser.add_argument("--parallel", default=None)
     parser.add_argument('--old', default=None)
     parser.add_argument('--save', default=None)
+    parser.add_argument('--save_checkpoint', default=None)
     parser.add_argument('--results_dir', type=str, default=None)
     parser.add_argument('--data_dir', type=str, default=None)
     args = parser.parse_args()
 
     save = bool(int(args.save)) if args.save is not None else True
+    save_checkpoint = bool(int(args.save_checkpoint)) if args.save_checkpoint is not None else True
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
     parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
     old = bool(int(args.old)) if args.old is not None else False
@@ -73,12 +76,13 @@ if __name__ == "__main__":
         alpha=alpha,
         rng=rng,
         metrics=metrics,
-        results_dir=data_dir + "/simulated/" if save else None,
+        results_dir=data_dir + "/simulated/" if save_checkpoint else None,
         parallel=parallel,
         old=old,
     )
 
     if save:
+        os.makedirs(f"{data_dir}/simulated/", exist_ok=True)
         sim_out.to_csv(f"{data_dir}/simulated/full_simulation_results.csv", index=False)
         with open(f"{data_dir}/simulated/simulation_samples.pkl", "wb") as f:
             pickle.dump(samples_list, f)
