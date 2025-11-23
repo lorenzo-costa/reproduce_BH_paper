@@ -21,7 +21,7 @@ simulate:
 
 # run simulations parallel
 parallel_simulate:
-	$(PYTHON) -m $(SRC).run_simulation --parallel 1
+	$(PYTHON) -m $(SRC).run_simulation --parallel 0
 
 # analyze results
 analyse:
