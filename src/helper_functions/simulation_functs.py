@@ -32,8 +32,8 @@ def run_scenario(samples,
     # numba doesn't like strings so pass an int
     means[:m-m0] = generate_means(m=m, m0=m0, scheme=scheme_dict[scheme], L=L)
     # uses property of Gaussian X ~ N(mu, 1) => X = mu + Z, Z ~ N(0,1)
+    rng.shuffle(means)
     shifted_samples = samples + means
-    rng.shuffle(shifted_samples)
     p_values = compute_p_values(shifted_samples)
     rejected = method(p_values, alpha)
 

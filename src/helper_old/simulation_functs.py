@@ -17,8 +17,8 @@ def run_scenario(samples, m0_fraction, L, scheme, method, alpha, metrics, rng=No
     m0 = int(m * m0_fraction)
     means = generate_means(m=m, m0=m0, scheme=scheme, L=L, rng=rng)
     # uses property of Gaussian X ~ N(mu, 1) => X = mu + Z, Z ~ N(0,1)
+    rng.shuffle(means)
     shifted_samples = samples + means
-    rng.shuffle(shifted_samples)
     p_values = compute_p_values(shifted_samples)
     rejected = method(p_values, alpha)
 
