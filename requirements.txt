@@ -25,3 +25,4 @@ statsmodels
 tornado
 tqdm
 tzdata
+numba
