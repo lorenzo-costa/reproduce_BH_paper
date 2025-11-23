@@ -107,7 +107,8 @@ if __name__ == "__main__":
                                 "--parallel", "0",
                                 "--results_dir", "results/complexity/",
                                 "--data_dir", "data/complexity/",
-                                "--save_checkpoint", "0",])
+                                "--save_checkpoint", "0",
+                                "--save", "0",])
                 end = time.time()
                 times.append(end - start)
 
