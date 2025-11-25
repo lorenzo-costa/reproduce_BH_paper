@@ -88,7 +88,7 @@ if __name__ == '__main__':
             rng=rng,
             metrics=metrics,
             results_dir=None,
-            parallel=False,
+            parallel=parallel,
         )
     pr_new.disable()
     pr_new.dump_stats("results/profiling/profile_new.stats")
@@ -105,7 +105,7 @@ if __name__ == '__main__':
             rng=rng,
             metrics=metrics_old,
             results_dir=None,
-            parallel=False,
+            parallel=parallel,
             old=True
         )
     pr_old.disable()

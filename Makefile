@@ -41,6 +41,8 @@ test:
 	pytest
 
 # profiling
+profile:
+	$(PYTHON) -m $(SRC).profiling --nsim 1000 --parallel 0
 
 # complexity
 complexity:
