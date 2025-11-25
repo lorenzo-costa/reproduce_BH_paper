@@ -51,14 +51,32 @@ This project uses a `Makefile` to streamline the simulation and analysis pipelin
     ```
     This command will execute the simulation, perform the analysis, and generate the final figures.
 
+* **To run the entire simultations in parallel:**
+    ```bash
+    make parallel
+    ```
+    This uses all available cores to speed up the computations
+
 * **To run individual steps:**
-    * `make simulate`: Runs only the data simulation.
+    * `make simulate` (or `make simulate_parallel`): Runs only the data simulation.
     * `make analyse`: Runs the analysis on the simulated data.
     * `make figures`: Generates the figures from the analyzed data.
 
-## Estimated Runtime
+## Optimisation analysis
 
-The estimated time to run the complete analysis (`make all`) is approximately **2351 seconds** with a MacBook Air with Apple M4 chip and 16GB of RAM.
+Additional targets can be used to investigate the computational complexity and difference in runtime between different versions of the code.
+
+* **The analisys steps are:**:
+- `make profile` to run a profiler of the new and old versions of the code
+- `make complexity` to evaluate the scaling of the new code to different number of simulations
+- `make benchmark` to run a comparison between different versions of the code
+- `make regression` to test wether the old and new versions of the code return the same results
+
+* **To run the entire analysis:**
+    ```bash
+    make runtime_analysis
+    ```
+    Note this can take very long
 
 ## Summary of Key Findings
 
