@@ -32,14 +32,6 @@ figures:
 	$(PYTHON) -m $(SRC).make_plots --target plots
 	@echo "Figures should now be in $(RESULTS)/figures"
 
-# clean up caches
-clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-
-# run tests
-test:
-	pytest
-
 # profiling
 profile:
 	$(PYTHON) -m $(SRC).profiling --nsim 500 --parallel 0
@@ -62,6 +54,15 @@ benchmark:
 	$(PYTHON) -m $(SRC).make_plots --target benchmark
 	@echo "Benchmark plot should now be in $(RESULTS)/figures"
 
+# regression test
 regression:
 	$(PYTHON) -m $(SRC).test_regression
+
+# clean up caches
+clean:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+
+# run tests
+test:
+	pytest
 
