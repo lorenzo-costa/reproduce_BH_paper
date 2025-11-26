@@ -5,8 +5,6 @@ __pycache__
 *.pkl
 *.csv
 .ruff_cache
-*.pdf
-*.png
 profile.stats
 temp.ipynb
 timing_*.json

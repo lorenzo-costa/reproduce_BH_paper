@@ -76,37 +76,43 @@ if __name__ == '__main__':
     
     os.makedirs(results_dir + "profiling/", exist_ok=True)
 
-    with cProfile.Profile() as pr_new:
-        sim_out, samples_list = run_simulation(
-            nsim=nsim,
-            m=m,
-            m0_fraction=m0,
-            L=L,
-            scheme=scheme,
-            method=methods,
-            alpha=alpha,
-            rng=rng,
-            metrics=metrics,
-            results_dir=None,
-            parallel=parallel,
-        )
-    pr_new.disable()
-    pr_new.dump_stats("results/profiling/profile_new.stats")
+    if os.path.exists("results/profiling/profile_new.stats"):
+        print("Profile for new version already exists, skipping...")
+    else:
+        with cProfile.Profile() as pr_new:
+            sim_out, samples_list = run_simulation(
+                nsim=nsim,
+                m=m,
+                m0_fraction=m0,
+                L=L,
+                scheme=scheme,
+                method=methods,
+                alpha=alpha,
+                rng=rng,
+                metrics=metrics,
+                results_dir=None,
+                parallel=parallel,
+            )
+        pr_new.disable()
+        pr_new.dump_stats("results/profiling/profile_new.stats")        
 
-    with cProfile.Profile() as pr_old:
-         sim_out_old, samples_list_old = run_simulation_old(
-            nsim=nsim,
-            m=m,
-            m0_fraction=m0,
-            L=L,
-            scheme=scheme,
-            method=methods_old,
-            alpha=alpha,
-            rng=rng,
-            metrics=metrics_old,
-            results_dir=None,
-            parallel=parallel,
-            old=True
-        )
-    pr_old.disable()
-    pr_old.dump_stats("results/profiling/profile_old.stats")
+    if os.path.exists("results/profiling/profile_old.stats"):
+        print("Profile for old version already exists, skipping...")
+    else:
+        with cProfile.Profile() as pr_old:
+            sim_out_old, samples_list_old = run_simulation_old(
+                nsim=nsim,
+                m=m,
+                m0_fraction=m0,
+                L=L,
+                scheme=scheme,
+                method=methods_old,
+                alpha=alpha,
+                rng=rng,
+                metrics=metrics_old,
+                results_dir=None,
+                parallel=parallel,
+                old=True
+            )
+        pr_old.disable()
+        pr_old.dump_stats("results/profiling/profile_old.stats")
