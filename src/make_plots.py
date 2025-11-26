@@ -180,4 +180,52 @@ if __name__ == "__main__":
         else:
             plt.show()
         print("complexity plot saved.")
+    
+    if target in ["all", "single_simulation"]:
+        single_sim_dir = "results/single_simulation/"
+        single_sim_results = []
+
+        for root, _, files in os.walk(single_sim_dir):
+            for fname in files:
+                if fname.lower().endswith(".pkl"):
+                    path = os.path.join(root, fname)
+                    with open(path, "rb") as fh:
+                        try:
+                            single_sim_results.append(pickle.load(fh))
+                        except Exception as e:
+                            print(f"Failed to load {path}: {e}")
+        all_results = sorted(single_sim_results, key=lambda x: x['m'])
+
+        time_list = [all_results[i]['times'] for i in range(len(all_results))]
+        time_mean = np.mean(time_list, axis=1) 
+        m_list = np.array([all_results[i]['m'] for i in range(len(all_results))])
+
+        # plot empirical complexity fit
+        slope, intercept, fitted = fit_empirical_complexity(m_list, time_mean)
+        fitted = np.exp(intercept) * np.power(m_list, slope)
+
+        # using complexity from BASELINE.md
+        # $O\left(n_{scenarios} \cdot m\log m\right)$
+        theoretical_complexity = m_list * np.log(m_list)
+
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.plot(m_list, time_mean, 'o-', label='Observed times', color=colors[0])
+        ax.plot(m_list, fitted, '--', label = fr'Empirical interpolation $O(n^{{{slope:.2f}}})$', color=colors[1])
+        # scale theoretical to be in same scale as data
+        ax.plot(m_list, theoretical_complexity * (time_mean[0] / (m_list[0]*np.log(m_list[0]))), '--', label=fr'Theoretical Complexity $O(m\log m)$', color=colors[2])
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlabel('Number of Hypothesis (log scale)')
+        ax.set_ylabel('Runtime (log scale)')
+        ax.set_title('Runtime vs Number of Hypothesis')
+        ax.legend()
+        plt.tight_layout()
+        if output_path is not None:
+            plt.savefig(output_path + "single_simulation_complexity.png", dpi=300, bbox_inches="tight")
+            plt.savefig(output_path + "single_simulation_complexity.pdf", dpi=300, bbox_inches="tight")
+        else:
+            plt.show()
+        print("Single simulation plot saved.")
+        
         

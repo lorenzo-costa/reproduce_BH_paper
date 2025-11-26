@@ -41,6 +41,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_checkpoint', default=None)
     parser.add_argument('--results_dir', type=str, default=None)
     parser.add_argument('--data_dir', type=str, default=None)
+    parser.add_argument('--m', type=int, default=None)
     args = parser.parse_args()
 
     save = bool(int(args.save)) if args.save is not None else True
@@ -48,10 +49,10 @@ if __name__ == "__main__":
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
     parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
     old = bool(int(args.old)) if args.old is not None else False
+    m = args.m if args.m is not None else cfg["m"]
 
     methods = [method_map[name]() for name in cfg["methods"]]
     alpha = cfg["alpha"]
-    m = cfg["m"]
     m0 = cfg["m0"]
     metrics = [Power(), TrueRejections(), RejectionsNumber(), FalseDiscoveryRate()]
     L = cfg["L"]
