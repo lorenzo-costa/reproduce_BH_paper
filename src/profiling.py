@@ -28,6 +28,8 @@ from src.helper_old.methods import (
     BenjaminiHochberg as BenjaminiHochbergOld,
 )
 
+from src.helper_functions.plot_functions import create_dashed_boxed_message
+
 import pickle
 import numpy as np
 import yaml
@@ -116,3 +118,6 @@ if __name__ == '__main__':
             )
         pr_old.disable()
         pr_old.dump_stats("results/profiling/profile_old.stats")
+        
+    msg = "Profiling complete. Stats files saved to results/profiling/"
+    print(create_dashed_boxed_message(msg))
