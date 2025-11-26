@@ -55,12 +55,15 @@ method_map_old = {
 
 results_dir = "results/comparison/"
 
+metrics = [Power(), TrueRejections(), RejectionsNumber(), FalseDiscoveryRate()]
+metrics_old = [PowerOld(), TrueRejectionsOld(), RejectionsNumberOld(), FalseDiscoveryRateOld()]
+
 if __name__ == "__main__":
     try: 
-        sim_out_new = pd.read_csv("data/timing_new/simulated/full_simulation_results.csv")
-        sim_out_new_parallel = pd.read_csv("data/timing_new_parallel/simulated/full_simulation_results.csv")
-        sim_out_old = pd.read_csv("data/timing_old/simulated/full_simulation_results.csv")
-        sim_out_old_concat = pd.read_csv("data/timing_old_concat/simulated/full_simulation_results.csv")
+        sim_out_new = pd.read_csv("data/benchmark_new/simulated/full_simulation_results.csv")
+        sim_out_new_parallel = pd.read_csv("data/benchmark_new_parallel/simulated/full_simulation_results.csv")
+        sim_out_old = pd.read_csv("data/benchmark_old/simulated/full_simulation_results.csv")
+        sim_out_old_concat = pd.read_csv("data/benchmark_old_concat/simulated/full_simulation_results.csv")
         print("Loaded existing simulation results.")
         
     except FileNotFoundError:
