@@ -38,6 +38,8 @@ Figure 2 displays the plot of empirical vs theoretical complexity and the behavi
 ![complexity analysis](../results/figures/complexity_analysis.png)
 *Figure 2*: Comparison of runtime vs number of simulation runs for the teoretical upper bound (blue), the empirical complexity (red) and observed times (yellow) 
 
+Figure 3 and 4 run a similar analysis for a single simulation with increasing number of hypothesis tested. The plots display a scaling similar to that observed for different number of simulations. 
+
 ## Regression test
 The script `regression.py` runs validation tests to check if the different version produce the same results. The results are (almost) exactly the same across simulations. This was achieved by using numpy's `rng.spawn` to spawn random seed to use across simulations. This maintains consistency between parallel and sequential functions. 
 
