@@ -13,7 +13,7 @@ all: simulate analyse figures
 
 parallel: simulate_parallel analyse figures
 
-runtime_analysis: profile complexity benchmark regression
+runtime_analysis: profile complexity benchmark single_simulation regression
 
 # run simulations sequential
 simulate:

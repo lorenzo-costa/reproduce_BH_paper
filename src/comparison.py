@@ -68,8 +68,12 @@ if __name__ == "__main__":
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
 
-    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 2e4]
-    m_list = [1e2, 1e3, 1e4, 1e5, 1e6]
+    # n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 2e4]
+    # m_list = [1e2, 1e3, 1e4, 1e5, 1e6, 1e7]
+    
+    n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3]
+    m_list = [1e2, 1e3, 1e4]
+    
     
     # go back to a single one because it takes too long
     n_repeats = 1
@@ -122,7 +126,6 @@ if __name__ == "__main__":
                                 "--save_checkpoint", "0",
                                 "--save", "0",])
                 end_time_new[i] = time.time()
-            
             times_new = (end_time_new - start_time_new)
             # print(f"New simulation function took {np.max(end_time_new - start_time_new):.2f} seconds.\n")
             
@@ -188,9 +191,9 @@ if __name__ == "__main__":
             start_times = np.zeros(n_repeats)*1e10
             end_times = np.zeros(n_repeats)
             
-            for i in range(1, n_repeats + 2):
+            for i in range(n_repeats):
                 print(f"Run {i}")
-                start_times[i-1] = time.time()
+                start_times[i] = time.time()
                 subprocess.run(["python", "-m", "src.run_simulation", 
                                 "--nsim", str(nsim), 
                                 "--parallel", "0",
@@ -198,7 +201,7 @@ if __name__ == "__main__":
                                 "--data_dir", "data/complexity/",
                                 "--save_checkpoint", "0",
                                 "--save", "0",])
-                end_times[i-1] = time.time()
+                end_times[i] = time.time()
             times = end_times - start_times
 
             # print(f"Average elapsed time: {times.mean():.3f} seconds +/- {np.std(times):.3f} seconds")
