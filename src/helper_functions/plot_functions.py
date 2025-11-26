@@ -10,6 +10,24 @@ import re
 # Suppress weird matplotlib category warning for boxplots
 logging.getLogger("matplotlib.category").setLevel(logging.ERROR)
 
+def create_dashed_boxed_message(message):
+    """Wraps the given message string in a box frame made of dashes and pipes.
+
+    Args:
+        message: The string to be placed inside the box.
+
+    Returns:
+        A formatted string with the message centered in a dashed box.
+    """
+    
+    padding = 4 
+    content_width = len(message)
+    line_width = content_width + padding
+    horizontal_line = "-" * line_width
+    message_line = f"|  {message}  |"
+    
+    return f"\n\n{horizontal_line}\n{message_line}\n{horizontal_line}\n\n"
+
 
 def plot_with_bands(x_axis, y_axis, **kwargs):
     """Plot lines with confidence/error bands for each method.

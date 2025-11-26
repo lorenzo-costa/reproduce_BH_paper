@@ -26,6 +26,8 @@ from src.helper_old.methods import (
     BenjaminiHochberg as BenjaminiHochbergOld,
 )
 
+from src.helper_functions.plot_functions import create_dashed_boxed_message 
+
 import os
 import numpy as np
 import yaml
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     rng = np.random.default_rng(cfg["rng_seed"])
 
     n_sim_list = [1, 1e1, 5e1, 1e2, 5e2, 1e3, 5e3, 1e4, 2e4]
-    m_list = [1e2, 1e3, 1e4, 1e5, 1e6, 1e7]
+    m_list = [1e2, 1e3, 1e4, 1e5, 1e6]
     
     # go back to a single one because it takes too long
     n_repeats = 1
@@ -82,11 +84,13 @@ if __name__ == "__main__":
         os.makedirs(results_dir+"single_simulation/", exist_ok=True)
         
         for m_i in m_list:
+            m_i = int(m_i)
+
             if os.path.exists(os.path.join(results_dir, f"single_simulation/single_simulation_{m_i}.pkl")):
                 print(f"Single simulation for m={m_i} already exists, skipping...")
                 continue
             
-            m_i = int(m_i)
+            
             print(f"Running single simulation with m={m_i}")
             
             start_time_new_parallel = np.ones(n_repeats)*1e10
@@ -164,8 +168,9 @@ if __name__ == "__main__":
                     "times_new": times_new,
                     "times_new_parallel": times_new_parallel,
                 }, fh)
-
-        print(f"Single simulation complexity results saved to {results_dir}single_simulation/single_simulation_*.pkl")
+        
+        msg = f"Single simulation complexity results saved to {results_dir}single_simulation/single_simulation_*.pkl"
+        print(create_dashed_boxed_message(msg))
     
     # run simulations for different nsim to assess time complexity
     if target in ["all", "complexity"]:
@@ -203,8 +208,9 @@ if __name__ == "__main__":
                     "nsim": nsim,
                     "times": times,
                 }, fh)
-        
-        print(f"Complexity results saved to {results_dir}complexity/complexity_*.pkl")
+
+        msg = f"Complexity results saved to {results_dir}complexity/complexity_*.pkl"
+        print(create_dashed_boxed_message(msg))
 
     # run benchmarks
     if target in ["all", "benchmark"]:
@@ -296,4 +302,6 @@ if __name__ == "__main__":
                     },
                     f,
                 )
-        print(f"Benchmark results saved to {results_dir}benchmark/benchmark_*.pkl")
+        
+        msg = f"Benchmark results saved to {results_dir}benchmark/benchmark_*.pkl"
+        print(create_dashed_boxed_message(msg))

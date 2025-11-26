@@ -51,6 +51,11 @@ complexity:
 	$(PYTHON) -m $(SRC).make_plots --target complexity
 	@echo "Complexity plot should now be in $(RESULTS)/figures"
 
+single_simulation:
+	$(PYTHON) -m $(SRC).comparison --target single_simulation
+	$(PYTHON) -m $(SRC).make_plots --target single_simulation
+	@echo "Single simulation complexity completed. Results should be in $(RESULTS)/figures"
+
 # benchmark
 benchmark:
 	$(PYTHON) -m $(SRC).comparison --target benchmark
@@ -59,3 +64,4 @@ benchmark:
 
 regression:
 	$(PYTHON) -m $(SRC).test_regression
+

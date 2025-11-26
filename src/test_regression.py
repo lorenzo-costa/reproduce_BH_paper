@@ -31,6 +31,8 @@ from src.helper_old.methods import (
 
 from src.helper_functions.analyse_functions import aggregate_results
 
+from src.helper_functions.plot_functions import create_dashed_boxed_message
+
 import json
 import os
 import numpy as np
@@ -72,7 +74,6 @@ if __name__ == "__main__":
         m0 = cfg["m0"]
         L = cfg["L"]
         scheme = cfg["scheme"]
-        
             
         nsim = 10000
         methods = [method_map[name]() for name in cfg["methods"]]
@@ -163,5 +164,5 @@ if __name__ == "__main__":
             print(f"Discrepancy found in metric {metric} between old concatenated and old simulation!")
             all_good = False
     if all_good:
-        print(f"All simulation methods produce consistent results up to {tolerance}.")
-    
+        msg = f"All simulation methods produce consistent results up to {tolerance}."
+        print(create_dashed_boxed_message(msg))

@@ -2,7 +2,7 @@
 Script to create plots from simulation results
 """
 
-from src.helper_functions.plot_functions import plot_grid, plot_boxplot, plot_with_bands
+from src.helper_functions.plot_functions import plot_grid, plot_boxplot, plot_with_bands, create_dashed_boxed_message
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -98,12 +98,12 @@ if __name__ == "__main__":
                             complexity_results.append(pickle.load(fh))
                         except Exception as e:
                             print(f"Failed to load {path}: {e}")
-        all_results = sorted(complexity_results, key=lambda x: x['nsim'])
+        all_results_complexity = sorted(complexity_results, key=lambda x: x['nsim'])
 
-        time_list = [all_results[i]['times'] for i in range(len(all_results))]
+        time_list = [all_results_complexity[i]['times'] for i in range(len(all_results_complexity))]
         time_mean = np.mean(time_list, axis=1) 
-        n_sim_list = [all_results[i]['nsim'] for i in range(len(all_results))]
-        
+        n_sim_list = [all_results_complexity[i]['nsim'] for i in range(len(all_results_complexity))]
+
         # plot empirical complexity fit
         slope, intercept, fitted = fit_empirical_complexity(n_sim_list, time_mean)
         fitted = np.exp(intercept) * np.power(n_sim_list, slope)
@@ -118,7 +118,6 @@ if __name__ == "__main__":
 
         ax.plot(n_sim_list, time_mean, 'o-', label='Observed times', color=colors[0])
         ax.plot(n_sim_list, fitted, '--', label = fr'Empirical interpolation $O(n^{{{slope:.2f}}})$', color=colors[1])
-        # scale theoretical to be in same scale as data
         ax.plot(n_sim_list, theoretical_complexity * (time_mean[0] / (n_sim_list[0] * k)), '--', label='Theoretical Complexity', color=colors[2])
 
         ax.set_xscale('log')
@@ -150,17 +149,17 @@ if __name__ == "__main__":
                         except Exception as e:
                             print(f"Failed to load {path}: {e}")
 
-        all_results = sorted(benchmark_results, key=lambda x: x['nsim'])
+        all_results_benchmark = sorted(benchmark_results, key=lambda x: x['nsim'])
 
-        time_old = [all_results[i]['times_old'] for i in range(len(all_results))]
+        time_old = [all_results_benchmark[i]['times_old'] for i in range(len(all_results_benchmark))]
         time_old_mean = np.mean(time_old, axis=1)
-        time_new = [all_results[i]['times_new'] for i in range(len(all_results))]
+        time_new = [all_results_benchmark[i]['times_new'] for i in range(len(all_results_benchmark))]
         time_new_mean = np.mean(time_new, axis=1)
-        time_old_concat = [all_results[i]['times_old_concat'] for i in range(len(all_results))]
+        time_old_concat = [all_results_benchmark[i]['times_old_concat'] for i in range(len(all_results_benchmark))]
         time_old_concat_mean = np.mean(time_old_concat, axis=1)
-        time_new_parallel = [all_results[i]['times_new_parallel'] for i in range(len(all_results))]
+        time_new_parallel = [all_results_benchmark[i]['times_new_parallel'] for i in range(len(all_results_benchmark))]
         time_new_parallel_mean = np.mean(time_new_parallel, axis=1)
-        n_sim_list = [all_results[i]['nsim'] for i in range(len(all_results))]
+        n_sim_list = [all_results_benchmark[i]['nsim'] for i in range(len(all_results_benchmark))]
 
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.plot(n_sim_list, time_old_mean, marker='o', label='Old Method', color=colors[0])
@@ -184,7 +183,7 @@ if __name__ == "__main__":
     if target in ["all", "single_simulation"]:
         single_sim_dir = "results/single_simulation/"
         single_sim_results = []
-
+        
         for root, _, files in os.walk(single_sim_dir):
             for fname in files:
                 if fname.lower().endswith(".pkl"):
@@ -194,31 +193,35 @@ if __name__ == "__main__":
                             single_sim_results.append(pickle.load(fh))
                         except Exception as e:
                             print(f"Failed to load {path}: {e}")
-        all_results = sorted(single_sim_results, key=lambda x: x['m'])
+        all_results_single_sim = sorted(single_sim_results, key=lambda x: x['m'])
 
-        time_list = [all_results[i]['times'] for i in range(len(all_results))]
-        time_mean = np.mean(time_list, axis=1) 
-        m_list = np.array([all_results[i]['m'] for i in range(len(all_results))])
+        time_old = [all_results_single_sim[i]['times_old'] for i in range(len(all_results_single_sim))]
+        time_old_mean = np.mean(time_old, axis=1)
+        time_new = [all_results_single_sim[i]['times_new'] for i in range(len(all_results_single_sim))]
+        time_new_mean = np.mean(time_new, axis=1)
+        time_old_concat = [all_results_single_sim[i]['times_old_concat'] for i in range(len(all_results_single_sim))]
+        time_old_concat_mean = np.mean(time_old_concat, axis=1)
+        time_new_parallel = [all_results_single_sim[i]['times_new_parallel'] for i in range(len(all_results_single_sim))]
+        time_new_parallel_mean = np.mean(time_new_parallel, axis=1)
+        m_list = [all_results_single_sim[i]['m'] for i in range(len(all_results_single_sim))]
 
-        # plot empirical complexity fit
-        slope, intercept, fitted = fit_empirical_complexity(m_list, time_mean)
+        # single simulation complexity plot
+        # using complexity from BASELINE.md $O\left(n_{scenarios} \cdot m\log m\right)$
+        theoretical_complexity = m_list * np.log(m_list) * 72
+        
+        slope, intercept, fitted = fit_empirical_complexity(m_list, time_new_mean)
         fitted = np.exp(intercept) * np.power(m_list, slope)
 
-        # using complexity from BASELINE.md
-        # $O\left(n_{scenarios} \cdot m\log m\right)$
-        theoretical_complexity = m_list * np.log(m_list)
-
         fig, ax = plt.subplots(figsize=(5, 4))
-        ax.plot(m_list, time_mean, 'o-', label='Observed times', color=colors[0])
-        ax.plot(m_list, fitted, '--', label = fr'Empirical interpolation $O(n^{{{slope:.2f}}})$', color=colors[1])
-        # scale theoretical to be in same scale as data
-        ax.plot(m_list, theoretical_complexity * (time_mean[0] / (m_list[0]*np.log(m_list[0]))), '--', label=fr'Theoretical Complexity $O(m\log m)$', color=colors[2])
+        ax.plot(m_list, time_new_mean, 'o-', label='Observed times', color=colors[0])
+        ax.plot(m_list, fitted, '--', label = fr'Empirical interpolation $O(m^{{{slope:.2f}}})$', color=colors[1])
+        ax.plot(m_list, theoretical_complexity * (time_new_mean[0] / (m_list[0]*np.log(m_list[0])*72)), '--', label=fr'Theoretical Complexity $O(m\log m)$', color=colors[2])
 
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.set_xlabel('Number of Hypothesis (log scale)')
         ax.set_ylabel('Runtime (log scale)')
-        ax.set_title('Runtime vs Number of Hypothesis')
+        ax.set_title('Single simulation Complexity Analysis')
         ax.legend()
         plt.tight_layout()
         if output_path is not None:
@@ -226,6 +229,29 @@ if __name__ == "__main__":
             plt.savefig(output_path + "single_simulation_complexity.pdf", dpi=300, bbox_inches="tight")
         else:
             plt.show()
-        print("Single simulation plot saved.")
+        
+
+        # comparison plot complexity
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.plot(m_list, time_old_mean, marker='o', label='Old Method', color=colors[0])
+        ax.plot(m_list, time_new_mean, marker='o', label='New Method', color=colors[1])
+        ax.plot(m_list, time_old_concat_mean, marker='o', label='Old Method - Concat', color=colors[2])
+        ax.plot(m_list, time_new_parallel_mean, marker='o', label='New Method - Parallel', color=colors[3])
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel("Number of Hypothesis tested")
+        ax.set_ylabel("Runtime (log scale)")
+        ax.legend()
+        plt.title("Single Simulation Comparison")
+
+        if output_path is not None:
+            plt.savefig(output_path + "single_simulation_comparison.png", dpi=300, bbox_inches="tight")
+            plt.savefig(output_path + "single_simulation_comparison.pdf", dpi=300, bbox_inches="tight")
+        else:
+            plt.show()
+            
+        msg = f"Single simulation plots saved to {output_path}single_simulation*.png/pdf"
+        print(create_dashed_boxed_message(msg))
+        
         
         

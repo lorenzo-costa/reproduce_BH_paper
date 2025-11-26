@@ -287,6 +287,9 @@ def run_simulation(
     total_scenarios = len(m) * len(m0_fraction) * len(L) * len(scheme) * len(method)
     total_runs = nsim * total_scenarios
     
+    print(f"Running {nsim} simulations with {total_scenarios} scenarios each")
+    print(f"Total runs: {total_runs}")
+    
     child_seeds = rng.spawn(nsim)
 
     out = []

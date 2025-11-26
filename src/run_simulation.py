@@ -41,6 +41,7 @@ if __name__ == "__main__":
     parser.add_argument('--results_dir', type=str, default=None)
     parser.add_argument('--data_dir', type=str, default=None)
     parser.add_argument('--m', type=int, default=None)
+    parser.add_argument('--verbose', type=str, default=None)
     args = parser.parse_args()
 
     save_checkpoint = bool(int(args.save_checkpoint)) if args.save_checkpoint is not None else True
@@ -48,6 +49,7 @@ if __name__ == "__main__":
     nsim = args.nsim if args.nsim is not None else cfg["nsim"]
     parallel = bool(int(args.parallel)) if args.parallel is not None else cfg.get("parallel", False)
     m = args.m if args.m is not None else cfg["m"]
+    verbose = bool(int(args.verbose)) if args.verbose is not None else True
     
     methods = [method_map[name]() for name in cfg["methods"]]
     alpha = cfg["alpha"]
@@ -77,6 +79,7 @@ if __name__ == "__main__":
         metrics=metrics,
         results_dir=data_dir + "/simulated/" if save_checkpoint else None,
         parallel=parallel,
+        verbose=verbose,
     )
 
     if save:

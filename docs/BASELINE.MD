@@ -31,10 +31,14 @@ Breakdown of the procedure:
 			- compute the metrics.
 				each metric takes $O(m)$
 
-Note that for each iteration of $n_{sim}$ we loop over all values of $m$ (call them $m_{i}$) and for each of those we run all the scenarios. If we denote as $n_{scenario}$ the number of scenarios and $n_{metrics}$ the number of metrics, the computational complexity is:
+Note that for each iteration of $n_{sim}$ we loop over all values of $m$ (call them $m_{i}$) and for each of those we run all the scenarios. If we denote as $n_{scenario}$ the number of scenarios and $n_{metrics}$ the number of metrics, the computational complexity is for a single value of $m$ is:
 
-$O\left(n_{sim} \cdot n_{scenarios} \cdot \sum (m_{i}\log m_{i}+n_{metrics})\right) = O(n_{sim}\cdot k)$
+$O\left(n_{scenarios} \cdot ((m\log m+n_{metrics}))\right)$
 
-In particular in our case we have 4 non-zero mean fractions, 3 scheme types, 2 non-zero mean levels, 3 methods.  It means we have $n_{scenario}=4*3*2*3 = 72$ different scenarios. The actual value of these parameters does not influence computational cost, what matter is how many different values we try.
-Note also that in this case the number of metrics compute is fixed at four, hence negligible for complexity analysis, but still relevant in practice.
-With $m_i \in [4, 8, 16, 32, 64]$ and $n_{metrics}=4$ we can compute the constant $k$ which comes out to be $k\approx 33k$. 
+and so for the full simulation this is:
+
+$O\left(n_{sim} \cdot n_{scenarios} \cdot \sum (m_{i}\log m_{i}+n_{metrics})\right)$
+
+In particular in our case we have 4 non-zero mean fractions, 3 scheme types, 2 non-zero mean levels, 3 methods.  It means we have $n_{scenario}=4*3*2*3 = 72$ different scenarios. The actual value of these parameters does not influence computational cost, what matter is how many different values we try. Note also that the number of metrics computed is (most likely) fixed thus, hence negligible for complexity analysis (but still relevant in practice).
+
+Then the key parameter that determines the complexity of each individual simulation (i.e. whose value slows down/speeds up the computation) is the number of hypothesis tested.
