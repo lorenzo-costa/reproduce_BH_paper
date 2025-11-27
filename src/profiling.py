@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 m0_fraction=m0,
                 L=L,
                 scheme=scheme,
-                method=methods,
+                methods=methods,
                 alpha=alpha,
                 rng=rng,
                 metrics=metrics,

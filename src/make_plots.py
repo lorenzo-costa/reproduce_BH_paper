@@ -122,9 +122,9 @@ if __name__ == "__main__":
 
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.set_xlabel('n (log scale)')
-        ax.set_ylabel('Runtime (log scale)')
-        ax.set_title('Complexity analysis: Runtime vs n (log-log)')
+        ax.set_xlabel('Number of simulations (log scale)')
+        ax.set_ylabel('Runtime - seconds (log scale)')
+        ax.set_title('Complexity analysis: Runtime vs Number of simulations (log-log)')
         ax.legend()
         plt.tight_layout()
         if output_path is not None:
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         slope, intercept, fitted = fit_empirical_complexity(m_list, time_new_mean)
         fitted = np.exp(intercept) * np.power(m_list, slope)
 
-        fig, ax = plt.subplots(figsize=(5, 4))
+        fig, ax = plt.subplots(figsize=(6, 4))
         ax.plot(m_list, time_new_mean, 'o-', label='Observed times', color=colors[0])
         ax.plot(m_list, fitted, '--', label = fr'Empirical interpolation $O(m^{{{slope:.2f}}})$', color=colors[1])
         ax.plot(m_list, theoretical_complexity * (time_new_mean[0] / (m_list[0]*np.log(m_list[0])*72)), '--', label=fr'Theoretical Complexity $O(m\log m)$', color=colors[2])
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.set_xlabel('Number of Hypothesis (log scale)')
-        ax.set_ylabel('Runtime (log scale)')
+        ax.set_ylabel('Runtime - seconds (log scale)')
         ax.set_title('Single simulation Complexity Analysis')
         ax.legend()
         plt.tight_layout()
@@ -232,15 +232,15 @@ if __name__ == "__main__":
         
 
         # comparison plot complexity
-        fig, ax = plt.subplots(figsize=(5, 4))
+        fig, ax = plt.subplots(figsize=(6, 4))
         ax.plot(m_list, time_old_mean, marker='o', label='Old Method', color=colors[0])
         ax.plot(m_list, time_new_mean, marker='o', label='New Method', color=colors[1])
         ax.plot(m_list, time_old_concat_mean, marker='o', label='Old Method - Concat', color=colors[2])
         ax.plot(m_list, time_new_parallel_mean, marker='o', label='New Method - Parallel', color=colors[3])
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.set_xlabel("Number of Hypothesis tested")
-        ax.set_ylabel("Runtime (log scale)")
+        ax.set_xlabel("Number of Hypothesis (log scale)")
+        ax.set_ylabel("Runtime - seconds (log scale)")
         ax.legend()
         plt.title("Single Simulation Comparison")
 
