@@ -189,7 +189,6 @@ if __name__ == "__main__":
             end_times = np.zeros(n_repeats)
             
             for i in range(n_repeats):
-                print(f"Run {i}")
                 start_times[i] = time.time()
                 subprocess.run(["python", "-m", "src.run_simulation", 
                                 "--nsim", str(nsim), 

@@ -124,7 +124,7 @@ if __name__ == "__main__":
         ax.set_yscale('log')
         ax.set_xlabel('Number of simulations (log scale)')
         ax.set_ylabel('Runtime - seconds (log scale)')
-        ax.set_title('Complexity analysis: Runtime vs Number of simulations (log-log)')
+        ax.set_title('Full Simulation Complexity Analysis')
         ax.legend()
         plt.tight_layout()
         if output_path is not None:
@@ -168,8 +168,8 @@ if __name__ == "__main__":
         ax.plot(n_sim_list, time_new_parallel_mean, marker='o', label='New Method - Parallel', color=colors[3])
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.set_xlabel("Number of Simulations")
-        ax.set_ylabel("Time (seconds)")
+        ax.set_xlabel("Number of Simulations (log scale)")
+        ax.set_ylabel("Runtime - seconds (log scale)")
         ax.legend()
         plt.title("Simulation Timing Comparison")
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         ax.set_yscale('log')
         ax.set_xlabel('Number of Hypothesis (log scale)')
         ax.set_ylabel('Runtime - seconds (log scale)')
-        ax.set_title('Single simulation Complexity Analysis')
+        ax.set_title('Single Simulation Complexity Analysis')
         ax.legend()
         plt.tight_layout()
         if output_path is not None:
