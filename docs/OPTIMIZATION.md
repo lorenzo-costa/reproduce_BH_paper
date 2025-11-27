@@ -48,7 +48,15 @@ Figure 3 and 4 run a similar analysis for a single simulation with increasing nu
 
 
 ## Regression test
-The script `regression.py` runs validation tests to check if the different version produce the same results. The results are (almost) exactly the same across simulations. This was achieved by using numpy's `rng.spawn` to spawn random seed to use across simulations. This maintains consistency between parallel and sequential functions. 
+The script `regression.py` runs validation tests to check if the different version produce the same results. The results are results are not exactly the same because the new version handles the seeding differently. The difference is small (in the order oe $1e-3$ difference in average power) and does not change the results of the simulations. 
+
+In particular the reason behind this difference is that in every simulation scenario I was generating a new non-null hypothesis for each method tested. This is both conceptually wrong (I am not testing the method on the same target) and also slows down the code (I was running the function `generate_means` 3 times). Changing it sped up the code (even if marginally). As for correctness this is surely an issue but not a critical one: since I am generating from the same distribution and averaging over many runs the results are still similar. Modyfing the code gives 
+
+The script `regression.py` runs validation tests to check whether different versions of the code produce consistent results. The outputs are not perfectly identical because the new version initializes the random seed differently. However, the discrepancy is very small (on the order of $10e-3$ in average power) and does not affect the conclusions of the simulations.
+
+The main source of this difference is that in each simulation scenario, I was previously generating new non-null hypothesis for every method being tested. This was conceptually incorrect (each method was effectively being tested on a different target) and it also made the code slower by calling `generate_means` three separate times. After modifying the code so that all methods share the same generated hypothesis, the execution became slightly faster.
+
+In terms of correctness, this issue is not critical. Because all hypotheses were drawn from the same distribution and the results were averaged over many runs, the outcomes remained very similar. The code modification simply ensures conceptual consistency and marginally improves performance.
 
 ## Reflection
 The optimization that gave me the highest return on investment was surely removing the DataFrame concatenation. As the plots show, this change alone reduced the runtime by 7x. I found this somewhat surprising, as it was an obvious inefficiency, and I’m still not sure how I overlooked it earlier.
