@@ -2,7 +2,7 @@
 
 This is a brief outline of the improvement I made to speed up the code:
 1) As mentioned in `baseline.md` The profiler showed that the main bottleneck is the repeated concatenation of pandas DataFrames. This can be very easily sped up by appending elements to a list and then creating the Pandas DataFrame only when returning the results.
-2) According to profiler results the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `1-special.erfc(np.abs(z_scores) / np.sqrt(2))`. Time complexity should be the same but `special.erf` is 10x faster in practice ($\approx 1e^{-3}$ vs $\approx 1e^{-4}$ on $n=100$)
+2) According to profiler results, the second big bottleneck is the function `cdf` in `2*(1-cdf(scores))` called during p-value computation. This can be replaced with the more efficient `1-special.erfc(np.abs(z_scores) / np.sqrt(2))`. Time complexity should be the same but `special.erf` is 10x faster in practice ($\approx 1e^{-3}$ vs $\approx 1e^{-4}$ on $n=100$)
 3) Profiler shows that the next bottleneck are the functions computing the metrics (e.g. FDR). This was already vectorised in my original code. The next improvement I can implement is to use `numba` to compile the code in C. This adds a bit of overhead at the beginning (because of compilation) but runs faster. The gains are especially relevant as `nsim` grows since the compilation costs gets amortised over a larger number of iterations.
 4) Profiler shows next bottleneck is the function `generate_mean` to generate the non-zero null hypothesis. As before this is already vectorised and to make it faster I can compile it in C using numba. There are a few very small modifications required to make this run efficiently with numba such as moving the shuffling of the array outside the function and preallocating part of the memory before calling it (note: this is not strictly required, the computation of p-values should not depend on their order but it felt like the right thing to do. It also adds very little computation time). It also seems like adding the signature explicitly with `@njit(float64[:](int64, int64, int64, int64))` speeds up the code a little bit. I suspect it is due to more efficient compilation. Inded adding the signature makes numba compile the function as soon as it is imported instead of waiting for the first input, evaluating the type and then compiling. In the end it should not matter as much since compilation time is just amortised over all runs.
 
@@ -36,9 +36,16 @@ We have then that the optimized and parallel version is 7 times faster than the 
 Figure 2 displays the plot of empirical vs theoretical complexity and the behaviour of the actual timing data. From this it appears that I have not run yet into the cealing of asymptotic behaviour of the function. Indeed the upper bound for complexity is $O(k*n_{sim})$ where $k$ is a constant depending on the number of scenario I'm running (explained more in detail in `BASELINE.md`). From the plot it is clear that the behaviour of the function of $n$ up to $50k$ is closer to $n^{0.6}$ rathen than $n$. 
 
 ![complexity analysis](../results/figures/complexity_analysis.png)
-*Figure 2*: Comparison of runtime vs number of simulation runs for the teoretical upper bound (blue), the empirical complexity (red) and observed times (yellow) 
+*Figure 2*: Empirical complexity (red) vs theoretical upper bound (blue) for the full simulation study under the new (sequential) version of the code
 
 Figure 3 and 4 run a similar analysis for a single simulation with increasing number of hypothesis tested. The plots display a scaling similar to that observed for different number of simulations. 
+
+![complexity analysis](../results/figures/single_simulation_comparison.png)
+*Figure 3*: Runtime vs Number of hypothesis tested for a single simulation with different versions of the code
+
+![complexity analysis](../results/figures/single_simulation_complexity.png)
+*Figure 4*: Empirical complexity (red) vs theoretical upper bound (blue) for the a single simulation under the new (sequential) version of the code
+
 
 ## Regression test
 The script `regression.py` runs validation tests to check if the different version produce the same results. The results are (almost) exactly the same across simulations. This was achieved by using numpy's `rng.spawn` to spawn random seed to use across simulations. This maintains consistency between parallel and sequential functions. 
