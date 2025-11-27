@@ -129,12 +129,12 @@ class BenjaminiHochberg(MultipleTesting):
     Examples
     --------
     >>> from methods import BonferroniHochbergCorrection
-    >>> bonf = BenjaminiHochberg()
+    >>> bh = BenjaminiHochberg()
     >>> pvals = np.array([0.01, 0.04, 0.03, 0.20])
     >>> alpha = 0.05
-    >>> bonf(pvals, alpha)
-    array([ True, False, True, False])
-    >>> bonf.name
+    >>> bh(pvals, alpha)
+    array([ True, False, False, False])
+    >>> bh.name
     'Benjamini-Hochberg Correction'
     """
 

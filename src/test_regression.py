@@ -92,7 +92,7 @@ if __name__ == "__main__":
             m0_fraction=m0,
             L=L,
             scheme=scheme,
-            method=methods,
+            methods=methods,
             alpha=alpha,
             rng=rng1,
             metrics=metrics,
@@ -107,7 +107,7 @@ if __name__ == "__main__":
             m0_fraction=m0,
             L=L,
             scheme=scheme,
-            method=methods,
+            methods=methods,
             alpha=alpha,
             rng=rng2,
             metrics=metrics,
@@ -157,14 +157,13 @@ if __name__ == "__main__":
     for metric in metrics:
         metric = metric.name
         if not np.allclose(agg_new[metric], agg_old[metric], atol=tolerance):
-            print(f"Discrepancy found in metric {metric} between new and old simulation!")
-            print(np.max(np.abs(agg_new[metric] - agg_old[metric])))
+            print(f"Discrepancy of {np.max(np.abs(agg_new[metric] - agg_old[metric]))} found in metric {metric} between new and old simulation!")
             all_good = False
         if not np.allclose(agg_new_parallel[metric], agg_old[metric], atol=tolerance):
-            print(f"Discrepancy found in metric {metric} between new parallel and old simulation!")
+            print(f"Discrepancy of {np.max(np.abs(agg_new_parallel[metric] - agg_old[metric]))} found in metric {metric} between new parallel and old simulation!")
             all_good = False
         if not np.allclose(agg_old_concat[metric], agg_old[metric], atol=tolerance):
-            print(f"Discrepancy found in metric {metric} between old concatenated and old simulation!")
+            print(f"Discrepancy of {np.max(np.abs(agg_old_concat[metric] - agg_old[metric]))} found in metric {metric} between old concatenated and old simulation!")
             all_good = False
     if all_good:
         msg = f"All simulation methods produce consistent results up to {tolerance}."
