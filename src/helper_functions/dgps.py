@@ -7,7 +7,6 @@ from scipy import special
 from numba import njit, int64, float64, prange
 
 
-
 class DataGenerator(ABC):
     """Abstract base class for data generation.
 
@@ -107,6 +106,7 @@ class NormalGenerator(DataGenerator):
     def null_value(self):
         return self.loc
 
+
 @njit(float64[:](int64, int64, int64, int64))
 def generate_means(m, m0, scheme, L):
     """Generate a simulation scenario from a Gaussian sample.
@@ -137,14 +137,14 @@ def generate_means(m, m0, scheme, L):
     >>> means
     array([0., 0., 0., 0.])
     """
-    
+
     m1 = m - m0
     means = np.zeros(m1)
     if m0 == m:
         return means
 
     levels = np.array([L / 4, L / 2, 3 * L / 4, L])
-    
+
     base = m1 / 10
     if scheme == 1:  # Linearly Decreasing
         # more hp closer to 0. divide non nulls as: 4k, 3k, 2k, k
@@ -162,19 +162,25 @@ def generate_means(m, m0, scheme, L):
 
     # Adjust for rounding errors
     diff = m1 - counts.sum()
-    
+
     if diff > 0:
         for i in range(diff):
             counts[-1 - i] += 1
     elif diff < 0:
         for i in range(-diff):
             counts[i] -= 1
-            
-    means[0:counts[0]] = levels[0]
+
+    means[0 : counts[0]] = levels[0]
     means[counts[0] : counts[0] + counts[1]] = levels[1]
     means[counts[0] + counts[1] : counts[0] + counts[1] + counts[2]] = levels[2]
-    means[counts[0] + counts[1] + counts[2] : counts[0] + counts[1] + counts[2]+counts[3]] = levels[3]
+    means[
+        counts[0] + counts[1] + counts[2] : counts[0]
+        + counts[1]
+        + counts[2]
+        + counts[3]
+    ] = levels[3]
     return means
+
 
 def compute_p_values(z_scores):
     return 1 - special.erf(np.abs(z_scores) / np.sqrt(2))

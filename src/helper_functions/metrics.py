@@ -2,7 +2,12 @@
 
 import numpy as np
 from abc import ABC, abstractmethod
-from src.helper_functions.numba_functions import compute_power, compute_fdr, compute_true_rejections, compute_total_rejections
+from src.helper_functions.numba_functions import (
+    compute_power,
+    compute_fdr,
+    compute_true_rejections,
+    compute_total_rejections,
+)
 
 
 class Metric(ABC):

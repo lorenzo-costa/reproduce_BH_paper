@@ -88,7 +88,7 @@ def run_simulation_parallel(
     results_dir=None,
     n_jobs=None,
     old=True,
-    verbose=True
+    verbose=True,
 ):
     """Run simulation study in parallel for all combinations of parameters.
 
@@ -165,13 +165,15 @@ def run_simulation_parallel(
         out = pd.DataFrame()
     else:
         out = []
-    
+
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
 
     with Pool(processes=n_jobs) as pool:
         # imap maintains order and enable progress tracking
-        with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
+        with tqdm(
+            total=total_runs, desc="Running simulations", disable=not verbose
+        ) as pbar:
             for i, (results, samples_dict) in enumerate(
                 pool.imap(run_single_simulation, sim_args)
             ):
@@ -179,7 +181,7 @@ def run_simulation_parallel(
                     out = pd.concat([out, pd.DataFrame(results)], ignore_index=True)
                 else:
                     out.extend(results)
-                
+
                 samples_list.append(samples_dict)
 
                 pbar.update(len(results))
@@ -214,7 +216,7 @@ def run_simulation(
     parallel=False,
     n_jobs=None,
     old=False,
-    verbose=True
+    verbose=True,
 ):
     """Run simulation study for all combinations of parameters.
 
@@ -284,11 +286,13 @@ def run_simulation(
         out = pd.DataFrame()
     else:
         out = []
-    
+
     child_seeds = rng.spawn(nsim)
     samples_list = []
     save_points = np.unique(np.linspace(1, nsim, min(10, nsim), dtype=int))
-    with tqdm(total=total_runs, desc="Running simulations", disable=not verbose) as pbar:
+    with tqdm(
+        total=total_runs, desc="Running simulations", disable=not verbose
+    ) as pbar:
         for i in range(nsim):
             rng_sim = np.random.default_rng(child_seeds[i])
             if (i + 1) in save_points:
@@ -324,8 +328,9 @@ def run_simulation(
                     scenario_out["nsim"] = i + 1
                     if old:
                         out = pd.concat(
-                        [out, pd.DataFrame(scenario_out, index=[0])], ignore_index=True
-                    )
+                            [out, pd.DataFrame(scenario_out, index=[0])],
+                            ignore_index=True,
+                        )
                     else:
                         out.append(scenario_out)
                     pbar.update(1)

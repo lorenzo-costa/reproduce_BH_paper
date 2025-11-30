@@ -14,7 +14,7 @@ from src.helper_functions.methods import (
     BenjaminiHochberg,
 )
 
-from src.helper_old.simulation_functs import (run_simulation as run_simulation_old)
+from src.helper_old.simulation_functs import run_simulation as run_simulation_old
 
 from src.helper_old.metrics import (
     Power as PowerOld,
@@ -48,16 +48,16 @@ method_map_old = {
     "BenjaminiHochberg": BenjaminiHochbergOld,
 }
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with open("config.yaml", "r") as f:
         cfg = yaml.safe_load(f)
-        
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--nsim", type=int, default=None)
     parser.add_argument("--parallel", default=1)
     args = parser.parse_args()
     # cannot run full 20k because old non-parallel version is too slow
-    nsim = args.nsim if args.nsim is not None else 2000 
+    nsim = args.nsim if args.nsim is not None else 2000
     parallel = bool(int(args.parallel))
 
     methods = [method_map[name]() for name in cfg["methods"]]
@@ -68,14 +68,19 @@ if __name__ == '__main__':
     m0 = cfg["m0"]
 
     metrics = [Power(), TrueRejections(), RejectionsNumber(), FalseDiscoveryRate()]
-    metrics_old = [PowerOld(), TrueRejectionsOld(), RejectionsNumberOld(), FalseDiscoveryRateOld()]
+    metrics_old = [
+        PowerOld(),
+        TrueRejectionsOld(),
+        RejectionsNumberOld(),
+        FalseDiscoveryRateOld(),
+    ]
     L = cfg["L"]
     scheme = cfg["scheme"]
     rng = np.random.default_rng(cfg["rng_seed"])
 
     results_dir = cfg.get("results_dir", "results/")
     data_dir = cfg.get("data_dir", "data/")
-    
+
     os.makedirs(results_dir + "profiling/", exist_ok=True)
 
     if os.path.exists("results/profiling/profile_new.stats"):
@@ -96,7 +101,7 @@ if __name__ == '__main__':
                 parallel=parallel,
             )
         pr_new.disable()
-        pr_new.dump_stats("results/profiling/profile_new.stats")        
+        pr_new.dump_stats("results/profiling/profile_new.stats")
 
     if os.path.exists("results/profiling/profile_old.stats"):
         print("Profile for old version already exists, skipping...")
@@ -114,10 +119,10 @@ if __name__ == '__main__':
                 metrics=metrics_old,
                 results_dir=None,
                 parallel=parallel,
-                old=True
+                old=True,
             )
         pr_old.disable()
         pr_old.dump_stats("results/profiling/profile_old.stats")
-        
+
     msg = "Profiling complete. Stats files saved to results/profiling/"
     print(create_dashed_boxed_message(msg))

@@ -7,7 +7,11 @@ from tqdm import tqdm
 import itertools
 from multiprocessing import Pool, cpu_count
 import os
-from src.helper_functions.methods import BenjaminiHochberg, Bonferroni, BonferroniHochberg
+from src.helper_functions.methods import (
+    BenjaminiHochberg,
+    Bonferroni,
+    BonferroniHochberg,
+)
 
 
 scheme_dict = {
@@ -35,27 +39,28 @@ def run_single_simulation(args):
     for m_i in m:
         samples = NormalGenerator(loc=0, scale=1).generate(m_i, rng=rng)
         samples_dict[m_i] = samples
-        # by generating this now it pre-allocates memory and we do not need to 
+        # by generating this now it pre-allocates memory and we do not need to
         # do for each scenario
 
-        for m0_fraction_i, L_i, scheme_i in itertools.product(
-            m0_fraction, L, scheme):
+        for m0_fraction_i, L_i, scheme_i in itertools.product(m0_fraction, L, scheme):
             # run one scenario
 
             m0 = int(m_i * m0_fraction_i)
             means = np.zeros(m_i)
-            means[:m_i-m0] = generate_means(m=m_i, m0=m0, scheme=scheme_dict[scheme_i], L=L_i)
+            means[: m_i - m0] = generate_means(
+                m=m_i, m0=m0, scheme=scheme_dict[scheme_i], L=L_i
+            )
             shifted_samples = samples + means
             p_values = compute_p_values(shifted_samples)
-            
+
             for method_i in methods:
                 scenario_out = {
-                "m": m_i,
-                "m0_fraction": m0_fraction_i,
-                "m0": m0,
-                "L": L_i,
-                "scheme": scheme_i,
-                "method": method_i.name,
+                    "m": m_i,
+                    "m0_fraction": m0_fraction_i,
+                    "m0": m0,
+                    "L": L_i,
+                    "scheme": scheme_i,
+                    "method": method_i.name,
                 }
                 rejected = method_i(p_values, alpha)
                 for eval_metric in metrics:
@@ -159,12 +164,9 @@ def run_simulation_parallel(
     with Pool(processes=n_jobs) as pool:
         with tqdm(total=nsim, desc="Running simulations", disable=not verbose) as pbar:
             for i, (results, samples_dict) in enumerate(
-                pool.imap(
-                    run_single_simulation, 
-                    sim_args,
-                    chunksize=chunk_size)
+                pool.imap(run_single_simulation, sim_args, chunksize=chunk_size)
             ):
-                out.extend(results) 
+                out.extend(results)
                 samples_list.append(samples_dict)
                 pbar.update(1)
 
@@ -233,7 +235,7 @@ def run_simulation(
             rng=rng,
             results_dir=results_dir,
             n_jobs=n_jobs,
-            verbose=verbose
+            verbose=verbose,
         )
 
     if rng is None:
@@ -252,14 +254,14 @@ def run_simulation(
         scheme = [scheme]
     if not isinstance(methods, (list, np.ndarray)):
         methods = [methods]
-    
+
     if results_dir is not None:
         os.makedirs(f"{results_dir}/raw", exist_ok=True)
 
     total_scenarios = len(m) * len(m0_fraction) * len(L) * len(scheme) * len(methods)
-    
+
     print(f"\nRunning {nsim} simulations with {total_scenarios} scenarios each")
-    
+
     child_seeds = rng.spawn(nsim)
 
     out = []
@@ -273,24 +275,15 @@ def run_simulation(
                         f"{results_dir}/raw/simulation_results_checkpoint_{i}.csv",
                         index=False,
                     )
-            
-            sim_out = run_single_simulation((
-                i,
-                m,
-                m0_fraction,
-                L,
-                scheme,
-                methods,
-                alpha,
-                metrics,
-                child_seeds[i]
-            ))
-            
+
+            sim_out = run_single_simulation(
+                (i, m, m0_fraction, L, scheme, methods, alpha, metrics, child_seeds[i])
+            )
+
             out.extend(sim_out[0])
             samples_list.append(sim_out[1])
             pbar.update(1)
             # pbar.refresh()
-        
 
     out = pd.DataFrame(out)
     return out, samples_list

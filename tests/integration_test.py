@@ -118,6 +118,7 @@ def test_fdr_power_greater_equal_bonferroni():
             f"FDR power {power_fdr} is less than Bonferroni power {power_bonf}"
         )
 
+
 def test_parallelization_equal_nonparallel():
     nsim = 200
     methods = [Bonferroni(), BonferroniHochberg(), BenjaminiHochberg()]
@@ -127,7 +128,7 @@ def test_parallelization_equal_nonparallel():
     metrics = [Power(), TrueRejections(), RejectionsNumber()]
     L = [5]
     scheme = ["E", "I", "D"]
-    
+
     rng = np.random.default_rng(42)
     result_sim_parallel, _ = run_simulation(
         m=m,
@@ -155,15 +156,26 @@ def test_parallelization_equal_nonparallel():
         metrics=metrics,
         parallel=False,
     )
-    agg_sequential = result_sim_nonparallel.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
-    agg_parallel = result_sim_parallel.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
-    
+    agg_sequential = (
+        result_sim_nonparallel.groupby(["method", "m", "m0_fraction", "scheme", "L"])
+        .mean()
+        .reset_index()
+    )
+    agg_parallel = (
+        result_sim_parallel.groupby(["method", "m", "m0_fraction", "scheme", "L"])
+        .mean()
+        .reset_index()
+    )
+
     for metric in metrics:
         metric = metric.name
         if not np.allclose(agg_sequential[metric], agg_parallel[metric], atol=1e-4):
-            print(f"Discrepancy found in metric {metric} between parallel and non-parallel simulation!")
+            print(
+                f"Discrepancy found in metric {metric} between parallel and non-parallel simulation!"
+            )
             print(np.max(np.abs(agg_sequential[metric] - agg_parallel[metric])))
             assert False
+
 
 def test_different_seed_different_results():
     nsim = 200
@@ -174,7 +186,7 @@ def test_different_seed_different_results():
     metrics = [Power(), TrueRejections(), RejectionsNumber()]
     L = [5]
     scheme = ["E", "I", "D"]
-    
+
     rng = np.random.default_rng(1)
     result_sim_parallel, _ = run_simulation(
         m=m,
@@ -202,14 +214,23 @@ def test_different_seed_different_results():
         metrics=metrics,
         parallel=False,
     )
-    agg_sequential = result_sim_nonparallel.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
-    agg_parallel = result_sim_parallel.groupby(['method', 'm', 'm0_fraction', 'scheme', 'L']).mean().reset_index()
-    
+    agg_sequential = (
+        result_sim_nonparallel.groupby(["method", "m", "m0_fraction", "scheme", "L"])
+        .mean()
+        .reset_index()
+    )
+    agg_parallel = (
+        result_sim_parallel.groupby(["method", "m", "m0_fraction", "scheme", "L"])
+        .mean()
+        .reset_index()
+    )
+
     for metric in metrics:
         metric = metric.name
         # now should be different
         if np.allclose(agg_sequential[metric], agg_parallel[metric], atol=1e-4):
-            print(f"Discrepancy found in metric {metric} between parallel and non-parallel simulation!")
+            print(
+                f"Discrepancy found in metric {metric} between parallel and non-parallel simulation!"
+            )
             print(np.max(np.abs(agg_sequential[metric] - agg_parallel[metric])))
             assert False
-    

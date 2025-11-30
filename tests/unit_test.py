@@ -167,7 +167,7 @@ def test_benjamini_hochberg_correction(pvals, alpha, expected):
 )
 def test_generate_means(m, m0, scheme, L, expected):
     means = np.zeros(m)
-    means[:m-m0] = generate_means(m, m0, scheme_dict[scheme], L)
+    means[: m - m0] = generate_means(m, m0, scheme_dict[scheme], L)
     # Check that the means contain the expected values (ignoring order)
     if expected is not None:
         for val in np.unique(expected):
